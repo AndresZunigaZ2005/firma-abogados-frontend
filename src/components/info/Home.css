@@ -1,0 +1,47 @@
+.home {
+    padding: 40px 20px; /* Margen arriba y abajo de 40px, y a los lados de 20px */
+    max-width: 1200px;
+    margin: 0 auto; /* Centra el contenido */
+  }
+  
+  .historia {
+    display: flex;
+    align-items: center;
+    gap: 40px; /* Espacio entre la imagen y el texto */
+  }
+  
+  .imagen-historia {
+    flex: 1;
+  }
+  
+  .imagen-historia img {
+    width: 100%; /* Ocupa todo el ancho del contenedor */
+    height: 300px; /* Altura fija para el banner */
+    object-fit: cover; /* Recorta la imagen para que cubra el contenedor */
+    object-position: center; /* Centra la imagen verticalmente */
+    border-radius: 10px; /* Bordes redondeados para la imagen */
+  }
+  
+  .texto-historia {
+    flex: 1;
+  }
+  
+  .texto-historia h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 32px;
+    color: #000; /* Texto en negro */
+    margin-bottom: 20px; /* Margen inferior para separar el título del texto */
+  }
+  
+  .texto-historia p {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    color: #000; /* Texto en negro */
+    line-height: 1.6;
+    text-align: justify; /* Justifica el texto */
+  }
+
+  .texto-historia p {
+    text-align: justify;
+    hyphens: auto; /* Permite la separación de palabras con guiones */
+  }

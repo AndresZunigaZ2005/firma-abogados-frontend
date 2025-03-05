@@ -1,27 +1,25 @@
-import './App.css';
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-
-import Login from './components/logInView/Login'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import TopBar from './components/topBar/TopBar';
+import Login from './components/logInView/Login';
 import SignupClientForm from './components/registerClientView/SignupClientForm';
+import Home from './components/info/Home';
+import About from './components/info/About';
+import './App.css'; // Importa el archivo CSS
 
 function App() {
   return (
     <Router>
-      <div>
-        {/* Barra de navegación con enlaces */}
-        <nav>
-          <ul>
-            <li>
-              <Link to="/signup">Registro de Cliente</Link>
-            </li>
-          </ul>
-        </nav>
-
-        {/* Configuración de las rutas */}
-        <Routes>
-          <Route path="/signup" element={<SignupClientForm />} />
-          <Route path="/login" element={<Login/>}/>
-        </Routes>
+      <div className="App">
+        <TopBar />
+        <div className="main-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/aboutus" element={<About />} />
+            <Route path="/signup" element={<SignupClientForm />} />
+            <Route path="/login" element={<Login />} />
+          </Routes>
+        </div>
       </div>
     </Router>
   );

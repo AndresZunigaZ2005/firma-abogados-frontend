@@ -36,3 +36,8 @@
     transform: rotate(360deg);
   }
 }
+
+/* Asegúrate de que el contenido no se solape con el TopBar */
+body {
+  padding-top: 0px; /* Ajusta este valor según la altura de tu TopBar */
+}

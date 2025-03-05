@@ -1,0 +1,55 @@
+.sobre-nosotros {
+    padding: 40px 50px; /* Margen arriba y abajo de 40px, y a los lados de 20px */
+    max-width: 1200px;
+    margin: 0 auto; /* Centra el contenido */
+  }
+  
+  .seccion {
+    display: flex;
+    align-items: center;
+    margin-bottom: 40px;
+  }
+  
+  .seccion img {
+    max-width: 300px;
+    margin-right: 20px;
+  }
+  
+  .texto {
+    flex: 1;
+  }
+  
+  .texto h2 {
+    font-family: 'Abhaya Libre', serif;
+    font-size: 58px;
+    color: #000000;
+    margin-bottom: 20px; /* Margen inferior para separar el título del texto */
+  }
+  
+  .texto p, .texto ul {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    color: #000000;
+    line-height: 1.6;
+    text-align: justify; /* Justifica el texto */
+    margin-bottom: 20px; /* Margen inferior para separar párrafos */
+  }
+  
+  .texto ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .texto ul li {
+    margin-bottom: 10px;
+    position: relative;
+    padding-left: 20px;
+    text-align: justify; /* Justifica el texto de los elementos de la lista */
+  }
+  
+  .texto ul li::before {
+    content: "✔";
+    position: absolute;
+    left: 0;
+    color: #28a745;
+  }

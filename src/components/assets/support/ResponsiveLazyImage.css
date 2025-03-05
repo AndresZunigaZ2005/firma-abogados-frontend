@@ -1,0 +1,29 @@
+/* Estilos base para la imagen */
+.responsive-image img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  /* Tamaño pequeño (logo) */
+  .responsive-image.small img {
+    width: 50px; /* Ajusta este valor según tus necesidades */
+  }
+  
+  /* Tamaño mediano */
+  .responsive-image.medium img {
+    width: 410px; /* Ajusta este valor según tus necesidades */
+  }
+
+  /* Tamaño grande */
+  .responsive-image.large img{
+    width: 2000px;
+  }
+  
+  /* Tamaño grande (banner) */
+.responsive-image.banner img {
+  width: 100%; /* Ocupa todo el ancho disponible */
+  height: 270px; /* Altura fija para el banner */
+  object-fit: cover; /* Recorta la imagen para que cubra el contenedor */
+  object-position: center; /* Centra la imagen verticalmente */
+}
