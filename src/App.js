@@ -5,6 +5,7 @@ import Login from './components/logInView/Login';
 import SignupClientForm from './components/registerClientView/SignupClientForm';
 import Home from './components/info/Home';
 import About from './components/info/About';
+import UpdateProfileClient from './components/updateProfile/UpdateProfileClient';
 import './App.css'; // Importa el archivo CSS
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
             <Route path="/aboutus" element={<About />} />
             <Route path="/signup" element={<SignupClientForm />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/updateProfileClient" element={<UpdateProfileClient/>}/>
           </Routes>
         </div>
       </div>
