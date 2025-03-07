@@ -1,0 +1,54 @@
+.contact-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .contact-container h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #004aad; /* Color azul */
+  }
+  
+  .contact-info {
+    text-align: left;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .contact-item {
+    margin-bottom: 15px;
+  }
+  
+  .contact-label {
+    font-weight: bold;
+    color: #333;
+    margin-right: 10px;
+  }
+  
+  .contact-value {
+    color: #555;
+  }
+  
+  .contact-value a {
+    color: #004aad; /* Color azul para el enlace del teléfono */
+    text-decoration: none;
+  }
+  
+  .contact-value a:hover {
+    text-decoration: underline;
+  }
+  
+  .contact-value[onClick] {
+    cursor: pointer;
+    color: #004aad; /* Color azul para el correo */
+    text-decoration: underline;
+  }
+  
+  .contact-value[onClick]:hover {
+    color: #003f8a; /* Color azul más oscuro al pasar el mouse */
+  }

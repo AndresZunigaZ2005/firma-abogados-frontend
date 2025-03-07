@@ -1,9 +1,42 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Login.css'; // Archivo de estilos para el Login
 import ResponsiveLazyImage from '../assets/support/ResponsiveLazyImage';
 import Logo from '../assets/images/logo.png';
 
-const Login = () => {
+const Login = ({ onLogin }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      // Realiza la solicitud al backend para autenticar al usuario
+      const response = await fetch('https://api.ejemplo.com/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Credenciales incorrectas');
+      }
+
+      const data = await response.json();
+
+      // Almacena el JWT en localStorage
+      localStorage.setItem('jwt', data.token);
+
+      // Llama a la función onLogin para actualizar el estado de autenticación
+      onLogin();
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
   return (
     <div className="login-wrapper">
       {/* Contenedor de la imagen */}
@@ -23,7 +56,7 @@ const Login = () => {
         </div>
 
         {/* Formulario de inicio de sesión */}
-        <form className="login-form">
+        <form className="login-form" onSubmit={handleSubmit}>
           {/* Campo de correo electrónico */}
           <div className="form-group">
             <label htmlFor="email">E-mail</label>
@@ -33,6 +66,8 @@ const Login = () => {
               name="email"
               placeholder="E-mail"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
@@ -45,12 +80,17 @@ const Login = () => {
               name="password"
               placeholder="Contraseña"
               required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
+          {/* Mostrar mensaje de error si existe */}
+          {error && <div className="error-message">{error}</div>}
+
           {/* Enlace para recuperar contraseña */}
           <div className="forgot-password">
-            <a href="/recuperar-contraseña">Recuperar Contraseña</a>
+            <a href="/forgotPassword">Recuperar Contraseña</a>
           </div>
 
           {/* Botón de inicio de sesión */}
@@ -62,7 +102,7 @@ const Login = () => {
         {/* Enlaces adicionales */}
         <div className="additional-links">
           <a href="/signup">Registrarse</a>
-          <a href="/contactanos">Contáctanos</a>
+          <a href="/ContactUs">Contáctanos</a>
         </div>
       </div>
     </div>

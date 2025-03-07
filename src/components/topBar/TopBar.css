@@ -32,6 +32,7 @@
 .right-section {
   display: flex;
   align-items: center;
+  gap: 40px; /* Más espacio entre los elementos */
 }
 
 /* Navegación */
@@ -71,4 +72,82 @@
 
 .auth-links a:hover {
   color: #c5c5c5; /* Color gris al pasar el mouse */
+}
+
+/* Estilos para el menú del usuario autenticado */
+.user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Espacio entre el nombre, el logo y la flecha */
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease; /* Transición suave para el hover */
+}
+
+.user-info:hover {
+  background-color: #003f8a; /* Color más oscuro al pasar el mouse */
+}
+
+.user-info img {
+  width: 30px; /* Tamaño del logo */
+  height: 30px;
+  border-radius: 50%; /* Hace el logo circular */
+}
+
+.user-info span {
+  font-family: 'Abhaya Libre', serif; /* Fuente para el nombre */
+  font-weight: 700; /* Negrita */
+  font-size: 18px; /* Tamaño del texto */
+  color: #ffffff; /* Color del texto */
+}
+
+.dropdown-arrow {
+  font-size: 12px; /* Tamaño de la flecha */
+  color: #ffffff; /* Color de la flecha */
+}
+
+/* Menú desplegable */
+.dropdown-menu {
+  position: absolute;
+  top: 100%; /* Coloca el menú debajo del área del usuario */
+  right: 0;
+  background-color: #ffffff; /* Fondo blanco */
+  border: 1px solid #e0e0e0; /* Borde gris */
+  border-radius: 4px; /* Bordes redondeados */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra */
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+  display: none; /* Oculto por defecto */
+}
+
+.user-menu:hover .dropdown-menu {
+  display: block; /* Muestra el menú al hacer hover */
+}
+
+.dropdown-menu a,
+.dropdown-menu button {
+  display: block;
+  padding: 10px 20px;
+  text-decoration: none;
+  font-family: 'Abhaya Libre', serif; /* Fuente para los enlaces */
+  font-weight: 700; /* Negrita */
+  font-size: 16px; /* Tamaño del texto */
+  color: #004aad; /* Color azul para los enlaces */
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Transición suave */
+}
+
+.dropdown-menu a:hover,
+.dropdown-menu button:hover {
+  background-color: #f1f1f1; /* Fondo gris al pasar el mouse */
 }

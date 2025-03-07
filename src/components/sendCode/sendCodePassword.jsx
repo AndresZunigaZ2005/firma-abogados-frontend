@@ -3,7 +3,7 @@ import '../logInView/Login.css';
 import ResponsiveLazyImage from '../assets/support/ResponsiveLazyImage';
 import Logo from '../assets/images/logo.png';
 
-const SendCode = () => {
+const SendCodePassword = () => {
     return (
       <div className="login-wrapper">
         {/* Contenedor de la imagen */}
@@ -48,4 +48,4 @@ const SendCode = () => {
     );
   };
   
-  export default SendCode;
+  export default SendCodePassword;
