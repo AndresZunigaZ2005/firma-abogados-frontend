@@ -8,6 +8,7 @@ const ForgotPassword = () => {
   const location = useLocation(); // Obtener la ubicación actual
   const email = location.state?.email; // Obtener el email del estado
 
+  const [verificationCode, setVerificationCode] = useState(''); // Estado para el código de verificación
   const [newPassword, setNewPassword] = useState(''); // Estado para la nueva contraseña
   const [repeatPassword, setRepeatPassword] = useState(''); // Estado para repetir la contraseña
   const [error, setError] = useState(''); // Estado para manejar errores
@@ -31,7 +32,7 @@ const ForgotPassword = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          codigoVerificacion: 'aaaaaa', // Este valor debe obtenerse del usuario
+          codigoVerificacion: verificationCode, // Código de verificación ingresado por el usuario
           email, // Email obtenido del estado
           passwordNueva: newPassword,
           repetirContraseña: repeatPassword,
@@ -71,6 +72,20 @@ const ForgotPassword = () => {
 
         {/* Formulario de inicio de sesión */}
         <form className="login-form" onSubmit={handleSubmit}>
+          {/* Campo de código de verificación */}
+          <div className="form-group">
+            <label htmlFor="verificationCode">Código de verificación:</label>
+            <input
+              type="text"
+              id="verificationCode"
+              name="verificationCode"
+              placeholder="Código de verificación"
+              required
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+            />
+          </div>
+
           {/* Campo de nueva contraseña */}
           <div className="form-group">
             <label htmlFor="newPassword">Nueva contraseña:</label>
