@@ -28,6 +28,17 @@
   transition: opacity 0.3s ease; /* Transición suave */
 }
 
+/* Menú de hamburguesa para móviles */
+.hamburger-menu {
+  display: none; /* Oculto por defecto */
+  cursor: pointer;
+}
+
+.hamburger-icon {
+  font-size: 24px;
+  color: #ffffff;
+}
+
 /* Sección derecha (navegación y autenticación) */
 .right-section {
   display: flex;
@@ -150,4 +161,37 @@
 .dropdown-menu a:hover,
 .dropdown-menu button:hover {
   background-color: #f1f1f1; /* Fondo gris al pasar el mouse */
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .hamburger-menu {
+    display: block; /* Muestra el menú de hamburguesa en móviles */
+  }
+
+  .right-section {
+    display: none; /* Oculta la sección derecha en móviles */
+    flex-direction: column;
+    position: absolute;
+    top: 60px; /* Ajusta según la altura del TopBar */
+    right: 0;
+    background-color: #004aad; /* Fondo azul */
+    width: 100%;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .right-section.mobile-visible {
+    display: flex; /* Muestra la sección derecha cuando el menú está activo */
+  }
+
+  .navigation,
+  .auth-links {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .user-menu {
+    margin-top: 10px;
+  }
 }

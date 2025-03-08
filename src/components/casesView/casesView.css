@@ -35,11 +35,6 @@
   margin-bottom: 12px;
 }
 
-.lawyer {
-  font-size: 14px;
-  color: #ffffff; /* Letras blancas */
-}
-
 .card-actions {
   display: flex;
   justify-content: flex-end;

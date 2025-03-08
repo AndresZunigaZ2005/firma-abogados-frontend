@@ -6,9 +6,10 @@ import objetivos from '../assets/images/objetivos.png';
 import './About.css'; // Archivo de estilos para esta sección
 
 const About = () => {
-    return (
-      <div className="sobre-nosotros">
-        {/* Misión */}
+  return (
+    <div className="sobre-nosotros">
+      {/* Misión */}
+      <div className="seccion-contenedor">
         <div className="seccion">
           <ResponsiveLazyImage
             imagePath={mision}
@@ -26,8 +27,10 @@ const About = () => {
             </p>
           </div>
         </div>
-  
-        {/* Visión */}
+      </div>
+
+      {/* Visión */}
+      <div className="seccion-contenedor">
         <div className="seccion">
           <div className="texto">
             <h2>Visión</h2>
@@ -44,8 +47,10 @@ const About = () => {
             size="large"
           />
         </div>
-  
-        {/* Objetivos */}
+      </div>
+
+      {/* Objetivos */}
+      <div className="seccion-contenedor">
         <div className="seccion">
           <ResponsiveLazyImage
             imagePath={objetivos}
@@ -62,7 +67,8 @@ const About = () => {
           </div>
         </div>
       </div>
-    );
-  };
-  
-  export default About;
+    </div>
+  );
+};
+
+export default About;

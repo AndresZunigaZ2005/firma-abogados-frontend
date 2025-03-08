@@ -1,11 +1,43 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import './SignupClientForm.css'; // Archivo de estilos para el Registro
 
 const SignupClientForm = () => {
+  const [cedula, setCedula] = useState('');
+  const [nombre, setNombre] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [email, setEmail] = useState('');
+  const [direccion, setDireccion] = useState('');
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [repeatPasswordError, setRepeatPasswordError] = useState('');
+  const [error, setError] = useState('');
+
+  // Cargar datos desde localStorage al montar el componente
+  useEffect(() => {
+    const savedData = JSON.parse(localStorage.getItem('formData')) || {};
+    setCedula(savedData.cedula || '');
+    setNombre(savedData.nombre || '');
+    setTelefono(savedData.telefono || '');
+    setEmail(savedData.email || '');
+    setDireccion(savedData.direccion || '');
+    setPassword(savedData.password || '');
+    setRepeatPassword(savedData.repeatPassword || '');
+  }, []);
+
+  // Guardar datos en localStorage cuando cambian
+  useEffect(() => {
+    const formData = {
+      cedula,
+      nombre,
+      telefono,
+      email,
+      direccion,
+      password,
+      repeatPassword,
+    };
+    localStorage.setItem('formData', JSON.stringify(formData));
+  }, [cedula, nombre, telefono, email, direccion, password, repeatPassword]);
 
   // Validar la contraseña
   const validatePassword = (value) => {
@@ -34,7 +66,7 @@ const SignupClientForm = () => {
     const value = e.target.value;
     setPassword(value);
     validatePassword(value);
-    if (repeatPassword) validateRepeatPassword(repeatPassword); // Validar repetir contraseña si ya tiene valor
+    if (repeatPassword) validateRepeatPassword(repeatPassword);
   };
 
   // Manejar cambios en el campo de repetir contraseña
@@ -42,6 +74,51 @@ const SignupClientForm = () => {
     const value = e.target.value;
     setRepeatPassword(value);
     validateRepeatPassword(value);
+  };
+
+  // Manejar el envío del formulario
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    // Validar que no haya errores en las contraseñas
+    if (passwordError || repeatPasswordError) {
+      setError('Por favor, corrige los errores en las contraseñas.');
+      return;
+    }
+  
+    // Crear el objeto con los datos del formulario
+    const datosCuenta = {
+      cedula,
+      nombre,
+      telefono,
+      email,
+      direccion,
+      password,
+      rol: 'CLIENTE', // Este valor es estático
+    };
+  
+    try {
+      // Hacer la solicitud POST al endpoint
+      const response = await fetch(process.env.REACT_APP_CREAR_CUENTA, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(datosCuenta),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al crear la cuenta');
+      }
+  
+      const data = await response.json();
+      console.log('Cuenta creada:', data);
+      setError(''); // Limpiar errores
+      alert('Cuenta creada exitosamente'); // Mostrar mensaje de éxito
+    } catch (error) {
+      console.error('Error:', error);
+      setError('Hubo un error al crear la cuenta. Inténtalo de nuevo.');
+    }
   };
 
   return (
@@ -52,7 +129,7 @@ const SignupClientForm = () => {
       </div>
 
       {/* Formulario de registro */}
-      <form className="registro-form">
+      <form className="registro-form" onSubmit={handleSubmit}>
         {/* Campo de cédula */}
         <div className="form-group">
           <label htmlFor="cedula">Cédula</label>
@@ -61,6 +138,8 @@ const SignupClientForm = () => {
             id="cedula"
             name="cedula"
             placeholder="Cédula"
+            value={cedula}
+            onChange={(e) => setCedula(e.target.value)}
             required
           />
         </div>
@@ -73,6 +152,8 @@ const SignupClientForm = () => {
             id="nombre"
             name="nombre"
             placeholder="Nombre"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
             required
           />
         </div>
@@ -85,18 +166,8 @@ const SignupClientForm = () => {
             id="telefono"
             name="telefono"
             placeholder="Teléfono"
-            required
-          />
-        </div>
-
-        {/* Campo de dirección */}
-        <div className="form-group">
-          <label htmlFor="direccion">Dirección</label>
-          <input
-            type="text"
-            id="direccion"
-            name="direccion"
-            placeholder="Dirección"
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value)}
             required
           />
         </div>
@@ -109,6 +180,22 @@ const SignupClientForm = () => {
             id="email"
             name="email"
             placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+
+        {/* Campo de dirección */}
+        <div className="form-group">
+          <label htmlFor="direccion">Dirección</label>
+          <input
+            type="text"
+            id="direccion"
+            name="direccion"
+            placeholder="Dirección"
+            value={direccion}
+            onChange={(e) => setDireccion(e.target.value)}
             required
           />
         </div>
@@ -142,6 +229,9 @@ const SignupClientForm = () => {
           />
           {repeatPasswordError && <p className="error-message">{repeatPasswordError}</p>}
         </div>
+
+        {/* Mostrar errores de la API */}
+        {error && <p className="error-message">{error}</p>}
 
         {/* Botón de registro */}
         <button type="submit" className="registro-button">

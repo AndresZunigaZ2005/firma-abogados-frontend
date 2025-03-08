@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import './TopBar.css'; // Asegúrate de crear este archivo para los estilos
 import ResponsiveLazyImage from '../assets/support/ResponsiveLazyImage';
 import logo from '../assets/images/logo.png';
+import profile from '../assets/images/profile.png';
 
 const TopBar = ({ isAuthenticated, onLogout }) => {
   const [userName, setUserName] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false); // Estado para el menú móvil
   const navigate = useNavigate();
 
   // Obtener el nombre del usuario al cargar el componente
@@ -47,6 +49,7 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
   const handleNavigation = (path) => {
     navigate(path); // Navega a la ruta especificada
     setShowDropdown(false); // Oculta el menú desplegable
+    setShowMobileMenu(false); // Oculta el menú móvil
   };
 
   return (
@@ -61,11 +64,16 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
         <h1>La Ley del Hielo</h1>
       </Link>
 
+      {/* Menú de hamburguesa para móviles */}
+      <div className="hamburger-menu" onClick={() => setShowMobileMenu(!showMobileMenu)}>
+        <div className="hamburger-icon">&#9776;</div> {/* Ícono de tres rayas */}
+      </div>
+
       {/* Navegación y autenticación */}
-      <div className="right-section">
+      <div className={`right-section ${showMobileMenu ? 'mobile-visible' : ''}`}>
         <nav className="navigation">
-          <Link to="/aboutus">Sobre Nosotros</Link>
-          <Link to="/contactUs">Contáctanos</Link>
+          <Link to="/aboutus" onClick={() => setShowMobileMenu(false)}>Sobre Nosotros</Link>
+          <Link to="/contactUs" onClick={() => setShowMobileMenu(false)}>Contáctanos</Link>
         </nav>
 
         {isAuthenticated ? (
@@ -77,7 +85,7 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
             >
               <span>{userName}</span>
               <ResponsiveLazyImage
-                imagePath={logo}
+                imagePath={profile}
                 altText="Logo de la aplicación"
                 size="small"
               />
@@ -99,8 +107,8 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
         ) : (
           // Si el usuario no está autenticado, muestra los enlaces de inicio de sesión y registro
           <div className="auth-links">
-            <Link to="/login">Iniciar sesión</Link>
-            <Link to="/signup">Registrarse</Link>
+            <Link to="/login" onClick={() => setShowMobileMenu(false)}>Iniciar sesión</Link>
+            <Link to="/signup" onClick={() => setShowMobileMenu(false)}>Registrarse</Link>
           </div>
         )}
       </div>

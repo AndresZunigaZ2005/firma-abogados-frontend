@@ -7,10 +7,45 @@ const UpdateProfileClient = () => {
   const [direccion, setDireccion] = useState('');
   const [correo, setCorreo] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí puedes agregar la lógica para actualizar el perfil
-    console.log('Perfil actualizado:', { nombre, telefono, direccion, correo });
+
+    // Obtener el token JWT del localStorage (o de donde lo tengas almacenado)
+    const token = localStorage.getItem('jwt');
+
+    // Datos que se enviarán en el cuerpo de la solicitud
+    const datosActualizacion = {
+      cedula: '123456789', // Aquí deberías obtener la cédula del usuario desde el token o el estado
+      nombre,
+      telefono,
+      email: correo,
+      direccion,
+      password: 'password', // Aquí deberías obtener la contraseña del usuario desde el token o el estado
+      rol: 'CLIENTE'
+    };
+
+    try {
+      const response = await fetch(process.env.REACT_APP_ACTUALIZAR_CUENTA, {
+        method: 'PUT', // o 'POST' dependiendo de tu API
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // Incluir el token JWT en la cabecera
+        },
+        body: JSON.stringify(datosActualizacion)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Perfil actualizado:', data);
+        alert('Perfil actualizado con éxito');
+      } else {
+        console.error('Error al actualizar el perfil:', response.statusText);
+        alert('Error al actualizar el perfil');
+      }
+    } catch (error) {
+      console.error('Error al realizar la solicitud:', error);
+      alert('Error al realizar la solicitud');
+    }
   };
 
   return (

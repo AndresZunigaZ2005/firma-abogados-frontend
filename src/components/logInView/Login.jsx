@@ -13,12 +13,12 @@ const Login = ({ onLogin }) => {
 
     try {
       // Realiza la solicitud al backend para autenticar al usuario
-      const response = await fetch('https://api.ejemplo.com/login', {
+      const response = await fetch(process.env.REACT_APP_LOGIN_CLIENTE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password }), // Cuerpo de la solicitud
       });
 
       if (!response.ok) {
@@ -90,7 +90,7 @@ const Login = ({ onLogin }) => {
 
           {/* Enlace para recuperar contraseña */}
           <div className="forgot-password">
-            <a href="/forgotPassword">Recuperar Contraseña</a>
+            <a href="/sendcode">Recuperar Contraseña</a>
           </div>
 
           {/* Botón de inicio de sesión */}
