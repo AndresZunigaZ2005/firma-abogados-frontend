@@ -30,6 +30,9 @@ const Login = ({ onLogin }) => {
       // Almacena el JWT en localStorage
       localStorage.setItem('jwt', data.token);
 
+      // Almacena el email en localStorage
+      localStorage.setItem('userEmail', email);
+
       // Llama a la función onLogin para actualizar el estado de autenticación
       onLogin();
     } catch (error) {

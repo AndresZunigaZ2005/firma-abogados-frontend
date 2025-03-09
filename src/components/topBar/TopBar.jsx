@@ -21,7 +21,11 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
   // Función para obtener los datos del usuario desde el backend
   const fetchUserData = async () => {
     try {
-      const response = await fetch('https://api.ejemplo.com/user', {
+      // Obtener el email del localStorage
+      const userEmail = localStorage.getItem('userEmail');
+
+      // Realizar la solicitud al endpoint con el email
+      const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_EMAIL}?email=${userEmail}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
@@ -33,7 +37,9 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
       }
 
       const data = await response.json();
-      setUserName(data.nombre); // Asume que el backend devuelve un objeto con un campo "nombre"
+      // Obtener solo la primera palabra del nombre
+      const firstName = data.nombre.split(' ')[0];
+      setUserName(firstName); // Establecer el nombre en el estado
     } catch (error) {
       console.error(error);
     }
@@ -41,8 +47,13 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
 
   // Función para manejar el cierre de sesión
   const handleLogout = () => {
+    // Eliminar el JWT y el email del localStorage
+    localStorage.removeItem('jwt');
+    localStorage.removeItem('userEmail');
+
     onLogout(); // Llama a la función de cierre de sesión
     setShowDropdown(false); // Oculta el menú desplegable
+    navigate('/'); // Redirige al usuario a la página de inicio
   };
 
   // Función para manejar la navegación desde los botones del menú desplegable
