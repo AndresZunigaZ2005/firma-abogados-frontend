@@ -25,7 +25,7 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
       const userEmail = localStorage.getItem('userEmail');
 
       // Realizar la solicitud al endpoint con el email
-      const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_EMAIL}?email=${userEmail}`, {
+      const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_EMAIL}/${userEmail}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('jwt')}`,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./CasesView.css"; // Importa los estilos
+import "./casesView.css"; // Importa los estilos
 
 const CasesView = () => {
   const [casos, setCasos] = useState([]); // Estado para almacenar los casos

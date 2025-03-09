@@ -8,7 +8,7 @@ import About from './components/info/About';
 import UpdateProfileClient from './components/updateProfile/UpdateProfileClient';
 import ForgotPassword from './components/forgotPassword/ForgotPassword';
 import SendCodePassword from './components/sendCode/sendCodePassword';
-import CasesView from './components/casesView/CasesView';
+import CasesView from './components/casesView/casesView';
 import Contact from './components/contact/Contact';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import './App.css'; // Importa el archivo CSS
