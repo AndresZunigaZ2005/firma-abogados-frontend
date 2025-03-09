@@ -19,6 +19,7 @@ function App() {
   // Función para manejar el cierre de sesión
   const handleLogout = () => {
     localStorage.removeItem('jwt'); // Elimina el JWT del localStorage
+    localStorage.removeItem('userEmail'); // Elimina el email del localStorage
     setIsAuthenticated(false); // Actualiza el estado de autenticación
   };
 
@@ -31,11 +32,17 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/aboutus" element={<About />} />
-            <Route path="/contactUs" element={<Contact/>} />
+            <Route path="/contactUs" element={<Contact />} />
             <Route path="/signup" element={<SignupClientForm />} />
             <Route
               path="/login"
-              element={<Login onLogin={() => setIsAuthenticated(true)} />}
+              element={
+                isAuthenticated ? ( // Si el usuario está autenticado
+                  <Navigate to="/" /> // Redirige a la página principal
+                ) : (
+                  <Login onLogin={() => setIsAuthenticated(true)} /> // Si no, muestra el formulario de inicio de sesión
+                )
+              }
             />
             <Route
               path="/updateProfileClient"

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import './Login.css'; // Archivo de estilos para el Login
 import ResponsiveLazyImage from '../assets/support/ResponsiveLazyImage';
 import Logo from '../assets/images/logo.png';
@@ -7,6 +8,7 @@ const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate(); // Obtener la función de navegación
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,6 +37,9 @@ const Login = ({ onLogin }) => {
 
       // Llama a la función onLogin para actualizar el estado de autenticación
       onLogin();
+
+      // Redirige al usuario a la página principal
+      navigate('/');
     } catch (error) {
       setError(error.message);
     }
