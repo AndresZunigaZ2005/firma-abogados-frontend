@@ -31,7 +31,7 @@ const UpdateProfileClient = () => {
       setTelefono(infoUser.telefono);
       setDireccion(infoUser.direccion);
       setCorreo(infoUser.email);
-      setPassword(infoUser.password);
+      setPassword(infoUser.password); // Establecer el valor original de la contraseña
     } catch (error) {
       console.error(error);
     }
@@ -45,12 +45,12 @@ const UpdateProfileClient = () => {
     e.preventDefault();
     
     const datosActualizacion = {
-      cedula,
+      cedula, // La cédula siempre será la original (infoUser.cedula)
       nombre,
       telefono,
-      email: correo,
+      email: correo, // El correo siempre será el original (infoUser.email)
       direccion,
-      password,
+      password, // La contraseña siempre será la original (infoUser.password)
       rol: 'CLIENTE'
     };
 
@@ -95,6 +95,14 @@ const UpdateProfileClient = () => {
         <div className="form-group">
           <label htmlFor="direccion">Dirección:</label>
           <input type="text" id="direccion" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
+        </div>
+        <div className="form-group">
+          <label htmlFor="correo">Correo:</label>
+          <input type="email" id="correo" value={correo} disabled />
+        </div>
+        <div className="form-group">
+          <label htmlFor="password">Contraseña:</label>
+          <input type="password" id="password" value={password} disabled />
         </div>
         <button type="submit" className="actualizar-button">Guardar Cambios</button>
       </form>
