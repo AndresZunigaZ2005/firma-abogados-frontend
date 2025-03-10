@@ -86,7 +86,7 @@ const UpdateProfileClient = () => {
         </div>
         <div className="form-group">
           <label htmlFor="cedula">Cédula:</label>
-          <input type="text" id="cedula" value={cedula} disabled />
+          <input type="text" id="cedula" value={cedula} />
         </div>
         <div className="form-group">
           <label htmlFor="telefono">Teléfono:</label>
@@ -99,10 +99,6 @@ const UpdateProfileClient = () => {
         <div className="form-group">
           <label htmlFor="correo">Correo:</label>
           <input type="email" id="correo" value={correo} disabled />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Contraseña:</label>
-          <input type="password" id="password" value={password} disabled />
         </div>
         <button type="submit" className="actualizar-button">Guardar Cambios</button>
       </form>
