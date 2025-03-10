@@ -53,7 +53,7 @@ const CasesView = () => {
       {casos.length === 0 ? (
         <p>No hay casos disponibles.</p> // Mensaje si no hay casos
       ) : (
-        casos.map((caso, index) => (
+        casos.Map((caso, index) => (
           <div key={caso.codigo} className="card">
             <div className="card-content">
               <h2 className="title">Caso: {index + 1}</h2> {/* Enumeración de casos */}
