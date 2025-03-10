@@ -37,8 +37,9 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
       }
 
       const data = await response.json();
+      const infoUser = data.respuesta;
       // Obtener solo la primera palabra del nombre
-      const firstName = data.nombre.split(' ')[0];
+      const firstName = infoUser.nombre.split(' ')[0];
       setUserName(firstName); // Establecer el nombre en el estado
     } catch (error) {
       console.error(error);

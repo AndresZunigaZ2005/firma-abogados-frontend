@@ -1,125 +1,92 @@
-import React, { useState } from 'react';
-import './UpdateProfileClient.css'; // Archivo de estilos para el componente
+import React, { useState, useEffect } from 'react';
 
-const UpdateProfileClient = () => {
+const UserProfile = () => {
+  // Estados para cada campo del cliente
   const [nombre, setNombre] = useState('');
+  const [cedula, setCedula] = useState('');
   const [telefono, setTelefono] = useState('');
   const [direccion, setDireccion] = useState('');
-  const [correo, setCorreo] = useState('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Obtener el token JWT del localStorage (o de donde lo tengas almacenado)
-    const token = localStorage.getItem('jwt');
-
-    // Datos que se enviarán en el cuerpo de la solicitud
-    const datosActualizacion = {
-      cedula: '123456789', // Aquí deberías obtener la cédula del usuario desde el token o el estado
-      nombre,
-      telefono,
-      email: correo,
-      direccion,
-      password: 'password', // Aquí deberías obtener la contraseña del usuario desde el token o el estado
-      rol: 'CLIENTE'
-    };
-
+  // Función para obtener los datos del cliente
+  const fetchUserData = async () => {
     try {
-      const response = await fetch(process.env.REACT_APP_ACTUALIZAR_CUENTA, {
-        method: 'PUT', // o 'POST' dependiendo de tu API
+      // Obtener el email del localStorage
+      const userEmail = localStorage.getItem('userEmail');
+
+      // Realizar la solicitud al endpoint con el email
+      const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_EMAIL}/${userEmail}`, {
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // Incluir el token JWT en la cabecera
+          'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
         },
-        body: JSON.stringify(datosActualizacion)
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Perfil actualizado:', data);
-        alert('Perfil actualizado con éxito');
-      } else {
-        console.error('Error al actualizar el perfil:', response.statusText);
-        alert('Error al actualizar el perfil');
+      if (!response.ok) {
+        throw new Error('Error al obtener los datos del usuario');
       }
+
+      const data = await response.json();
+      const infoUser = data.respuesta;
+
+      // Setear los campos con los datos del cliente (excluyendo el correo electrónico)
+      setNombre(infoUser.nombre);
+      setCedula(infoUser.cedula);
+      setTelefono(infoUser.telefono);
+      setDireccion(infoUser.direccion);
     } catch (error) {
-      console.error('Error al realizar la solicitud:', error);
-      alert('Error al realizar la solicitud');
+      console.error(error);
     }
   };
 
-  return (
-    <div className="actualizar-perfil-container">
-      {/* Encabezado */}
-      <div className="actualizar-perfil-header">
-        <h1>Actualizar Perfil</h1>
-      </div>
+  // Llamar a la función para obtener los datos del cliente cuando el componente se monta
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
-      {/* Formulario de actualización de perfil */}
-      <form className="actualizar-perfil-form" onSubmit={handleSubmit}>
-        {/* Campo de nombre */}
+  return (
+    <div className="user-profile">
+      <h1>Perfil del Usuario</h1>
+      <form>
         <div className="form-group">
-          <label htmlFor="nombre">Nombre</label>
+          <label htmlFor="nombre">Nombre:</label>
           <input
             type="text"
             id="nombre"
-            name="nombre"
-            placeholder="Nombre"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            required
           />
         </div>
-
-        {/* Campo de teléfono */}
         <div className="form-group">
-          <label htmlFor="telefono">Teléfono</label>
+          <label htmlFor="cedula">Cédula:</label>
           <input
-            type="tel"
+            type="text"
+            id="cedula"
+            value={cedula}
+            onChange={(e) => setCedula(e.target.value)}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="telefono">Teléfono:</label>
+          <input
+            type="text"
             id="telefono"
-            name="telefono"
-            placeholder="Teléfono"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
-            required
           />
         </div>
-
-        {/* Campo de dirección */}
         <div className="form-group">
-          <label htmlFor="direccion">Dirección</label>
+          <label htmlFor="direccion">Dirección:</label>
           <input
             type="text"
             id="direccion"
-            name="direccion"
-            placeholder="Dirección"
             value={direccion}
             onChange={(e) => setDireccion(e.target.value)}
-            required
           />
         </div>
-
-        {/* Campo de correo electrónico */}
-        <div className="form-group">
-          <label htmlFor="correo">Correo electrónico</label>
-          <input
-            type="email"
-            id="correo"
-            name="correo"
-            placeholder="Correo electrónico"
-            value={correo}
-            onChange={(e) => setCorreo(e.target.value)}
-            required
-          />
-        </div>
-
-        {/* Botón de actualizar */}
-        <button type="submit" className="actualizar-button">
-          Actualizar
-        </button>
+        <button type="submit">Guardar Cambios</button>
       </form>
     </div>
   );
 };
 
-export default UpdateProfileClient;
+export default UserProfile;
