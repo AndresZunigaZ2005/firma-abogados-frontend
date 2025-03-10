@@ -7,20 +7,29 @@ const CasesView = () => {
   // Función para obtener los casos desde el endpoint
   const fetchCasos = async () => {
     try {
+      // Obtener el email desde el localStorage
+      const userEmail = localStorage.getItem("userEmail");
+      if (!userEmail) {
+        throw new Error("No se encontró el email del usuario.");
+      }
+
       // Obtener el JWT desde el localStorage
       const jwt = localStorage.getItem("jwt");
       if (!jwt) {
         throw new Error("No se encontró el token de autenticación.");
       }
 
-      // Hacer la solicitud al endpoint con el JWT en los headers
-      const response = await fetch(process.env.REACT_APP_LISTAR_CASOS_CLIENTE, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt}`, // Incluir el JWT en el header
-        },
-      });
+      // Hacer la solicitud al endpoint con el email como parámetro
+      const response = await fetch(
+        `${process.env.REACT_APP_BUSCAR_POR_EMAIL}/${userEmail}`, // Usar el email en la URL
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${jwt}`, // Incluir el JWT en el header
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Error al obtener los casos");
