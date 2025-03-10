@@ -6,6 +6,8 @@ const UpdateProfileClient = () => {
   const [cedula, setCedula] = useState('');
   const [telefono, setTelefono] = useState('');
   const [direccion, setDireccion] = useState('');
+  const [correo, setCorreo] = useState('');
+  const [password, setPassword] = useState('');
 
   const fetchUserData = async () => {
     try {
@@ -28,6 +30,8 @@ const UpdateProfileClient = () => {
       setCedula(infoUser.cedula);
       setTelefono(infoUser.telefono);
       setDireccion(infoUser.direccion);
+      setCorreo(infoUser.email);
+      setPassword(infoUser.password);
     } catch (error) {
       console.error(error);
     }
@@ -37,19 +41,52 @@ const UpdateProfileClient = () => {
     fetchUserData();
   }, []);
 
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    
+    const datosActualizacion = {
+      cedula,
+      nombre,
+      telefono,
+      email: correo,
+      direccion,
+      password,
+      rol: 'CLIENTE'
+    };
+
+    try {
+      const response = await fetch(process.env.REACT_APP_ACTUALIZAR_CUENTA, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
+        },
+        body: JSON.stringify(datosActualizacion),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al actualizar los datos del usuario');
+      }
+
+      alert('Perfil actualizado con éxito');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="actualizar-perfil-container">
       <div className="actualizar-perfil-header">
         <h1>Actualizar Perfil</h1>
       </div>
-      <form className="actualizar-perfil-form">
+      <form className="actualizar-perfil-form" onSubmit={handleUpdate}>
         <div className="form-group">
           <label htmlFor="nombre">Nombre:</label>
           <input type="text" id="nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} />
         </div>
         <div className="form-group">
           <label htmlFor="cedula">Cédula:</label>
-          <input type="text" id="cedula" value={cedula} onChange={(e) => setCedula(e.target.value)} />
+          <input type="text" id="cedula" value={cedula} disabled />
         </div>
         <div className="form-group">
           <label htmlFor="telefono">Teléfono:</label>
