@@ -36,7 +36,8 @@ const CasesView = () => {
       }
 
       const clienteData = await clienteResponse.json();
-      const idCuenta = clienteData.idCuenta; // Obtener el idCuenta del cliente
+      const idCuenta = clienteData.respuesta.idCuenta;
+      console.log(idCuenta) // Obtener el idCuenta del cliente
 
       // 2. Obtener los casos asociados al idCuenta
       const casosResponse = await fetch(
@@ -55,7 +56,7 @@ const CasesView = () => {
       }
 
       const casosData = await casosResponse.json();
-      setCasos(casosData); // Guardar los casos en el estado
+      setCasos(casosData.respuesta); // Guardar los casos en el estado
     } catch (error) {
       console.error("Error al obtener los casos:", error);
       alert("No se pudieron cargar los casos. Por favor, inicia sesión."); // Mostrar mensaje de error al usuario
@@ -72,7 +73,7 @@ const CasesView = () => {
       {casos.length === 0 ? (
         <p>No hay casos disponibles.</p> // Mensaje si no hay casos
       ) : (
-        casos.Map((caso, index) => (
+        casos.map((caso, index) => (
           <div key={caso.codigo} className="card">
             <div className="card-content">
               <h2 className="title">Caso: {index + 1}</h2> {/* Enumeración de casos */}
