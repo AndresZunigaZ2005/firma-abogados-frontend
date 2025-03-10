@@ -4,7 +4,7 @@ import "./casesView.css"; // Importa los estilos
 const CasesView = () => {
   const [casos, setCasos] = useState([]); // Estado para almacenar los casos
 
-  // Función para obtener los casos desde el endpoint
+  // Función para obtener el cliente por email y luego los casos asociados
   const fetchCasos = async () => {
     try {
       // Obtener el email desde el localStorage
@@ -19,9 +19,9 @@ const CasesView = () => {
         throw new Error("No se encontró el token de autenticación.");
       }
 
-      // Hacer la solicitud al endpoint con el email como parámetro
-      const response = await fetch(
-        `${process.env.REACT_APP_BUSCAR_POR_EMAIL}/${userEmail}`, // Usar el email en la URL
+      // 1. Obtener el cliente por email
+      const clienteResponse = await fetch(
+        `${process.env.REACT_APP_BUSCAR_POR_EMAIL}/${encodeURIComponent(userEmail)}`, // Codificar el email
         {
           method: "GET",
           headers: {
@@ -31,12 +31,31 @@ const CasesView = () => {
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Error al obtener los casos");
+      if (!clienteResponse.ok) {
+        throw new Error("Error al obtener el cliente.");
       }
 
-      const data = await response.json();
-      setCasos(data); // Guardar los casos en el estado
+      const clienteData = await clienteResponse.json();
+      const idCuenta = clienteData.idCuenta; // Obtener el idCuenta del cliente
+
+      // 2. Obtener los casos asociados al idCuenta
+      const casosResponse = await fetch(
+        `${process.env.REACT_APP_LISTAR_CASOS_CLIENTE}/${idCuenta}`, // Usar el idCuenta en la URL
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${jwt}`, // Incluir el JWT en el header
+          },
+        }
+      );
+
+      if (!casosResponse.ok) {
+        throw new Error("Error al obtener los casos.");
+      }
+
+      const casosData = await casosResponse.json();
+      setCasos(casosData); // Guardar los casos en el estado
     } catch (error) {
       console.error("Error al obtener los casos:", error);
       alert("No se pudieron cargar los casos. Por favor, inicia sesión."); // Mostrar mensaje de error al usuario
