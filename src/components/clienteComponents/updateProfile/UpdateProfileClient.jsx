@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './UpdateProfileClient.css';
+import LoadingSpinner from '../../loading/LoadingSpinner'; // Asegúrate de tener esta ruta correcta
 
 const UpdateProfileClient = () => {
   const [nombre, setNombre] = useState('');
@@ -8,8 +9,10 @@ const UpdateProfileClient = () => {
   const [direccion, setDireccion] = useState('');
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Estado para controlar el loading
 
   const fetchUserData = async () => {
+    setIsLoading(true); // Activar loading al iniciar
     try {
       const userEmail = localStorage.getItem('userEmail');
       const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_EMAIL}/${userEmail}`, {
@@ -31,9 +34,12 @@ const UpdateProfileClient = () => {
       setTelefono(infoUser.telefono);
       setDireccion(infoUser.direccion);
       setCorreo(infoUser.email);
-      setPassword(infoUser.password); // Establecer el valor original de la contraseña
+      setPassword(infoUser.password);
     } catch (error) {
       console.error(error);
+      alert('Error al cargar los datos del perfil');
+    } finally {
+      setIsLoading(false); // Desactivar loading al finalizar
     }
   };
 
@@ -43,14 +49,15 @@ const UpdateProfileClient = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+    setIsLoading(true); // Activar loading al iniciar actualización
     
     const datosActualizacion = {
-      cedula, // La cédula siempre será la original (infoUser.cedula)
+      cedula,
       nombre,
       telefono,
-      email: correo, // El correo siempre será el original (infoUser.email)
+      email: correo,
       direccion,
-      password, // La contraseña siempre será la original (infoUser.password)
+      password,
       rol: 'CLIENTE'
     };
 
@@ -71,36 +78,81 @@ const UpdateProfileClient = () => {
       alert('Perfil actualizado con éxito');
     } catch (error) {
       console.error(error);
+      alert('Error al actualizar el perfil');
+    } finally {
+      setIsLoading(false); // Desactivar loading al finalizar
     }
   };
 
   return (
     <div className="actualizar-perfil-container">
+      {isLoading && <LoadingSpinner />} {/* Mostrar spinner cuando isLoading es true */}
+      
       <div className="actualizar-perfil-header">
         <h1>Actualizar Perfil</h1>
       </div>
+      
       <form className="actualizar-perfil-form" onSubmit={handleUpdate}>
         <div className="form-group">
           <label htmlFor="nombre">Nombre:</label>
-          <input type="text" id="nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+          <input 
+            type="text" 
+            id="nombre" 
+            value={nombre} 
+            onChange={(e) => setNombre(e.target.value)} 
+            disabled={isLoading}
+          />
         </div>
+        
         <div className="form-group">
           <label htmlFor="cedula">Cédula:</label>
-          <input type="text" id="cedula" value={cedula} />
+          <input 
+            type="text" 
+            id="cedula" 
+            value={cedula} 
+            disabled
+          />
         </div>
+        
         <div className="form-group">
           <label htmlFor="telefono">Teléfono:</label>
-          <input type="text" id="telefono" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
+          <input 
+            type="text" 
+            id="telefono" 
+            value={telefono} 
+            onChange={(e) => setTelefono(e.target.value)} 
+            disabled={isLoading}
+          />
         </div>
+        
         <div className="form-group">
           <label htmlFor="direccion">Dirección:</label>
-          <input type="text" id="direccion" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
+          <input 
+            type="text" 
+            id="direccion" 
+            value={direccion} 
+            onChange={(e) => setDireccion(e.target.value)} 
+            disabled={isLoading}
+          />
         </div>
+        
         <div className="form-group">
           <label htmlFor="correo">Correo:</label>
-          <input type="email" id="correo" value={correo} disabled />
+          <input 
+            type="email" 
+            id="correo" 
+            value={correo} 
+            disabled 
+          />
         </div>
-        <button type="submit" className="actualizar-button">Guardar Cambios</button>
+        
+        <button 
+          type="submit" 
+          className="actualizar-button"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Guardando...' : 'Guardar Cambios'}
+        </button>
       </form>
     </div>
   );

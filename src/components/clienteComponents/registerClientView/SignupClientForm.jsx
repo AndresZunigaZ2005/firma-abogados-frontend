@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './SignupClientForm.css'; // Archivo de estilos para el Registro
+import LoadingSpinner from '../../loading/LoadingSpinner'; // Importar el spinner
 
 const SignupClientForm = () => {
   const [cedula, setCedula] = useState('');
@@ -12,6 +13,7 @@ const SignupClientForm = () => {
   const [passwordError, setPasswordError] = useState('');
   const [repeatPasswordError, setRepeatPasswordError] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Nuevo estado para el loading
 
   // Cargar datos desde localStorage al montar el componente
   useEffect(() => {
@@ -79,7 +81,8 @@ const SignupClientForm = () => {
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    setIsLoading(true); // Activar loading al iniciar
+    setError('');
     // Validar que no haya errores en las contraseñas
     if (passwordError || repeatPasswordError) {
       setError('Por favor, corrige los errores en las contraseñas.');
@@ -115,9 +118,12 @@ const SignupClientForm = () => {
       console.log('Cuenta creada:', data);
       setError(''); // Limpiar errores
       alert('Cuenta creada exitosamente'); // Mostrar mensaje de éxito
+      localStorage.removeItem('formData'); // Limpiar datos guardados después de éxito
     } catch (error) {
       console.error('Error:', error);
       setError('Hubo un error al crear la cuenta. Inténtalo de nuevo.');
+    } finally{
+      setIsLoading(false); // Desactivar loading al finalizar
     }
   };
 
@@ -140,6 +146,7 @@ const SignupClientForm = () => {
             placeholder="Cédula"
             value={cedula}
             onChange={(e) => setCedula(e.target.value)}
+            disabled={isLoading}
             required
           />
         </div>
@@ -154,6 +161,7 @@ const SignupClientForm = () => {
             placeholder="Nombre"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
+            disabled={isLoading}
             required
           />
         </div>
@@ -168,6 +176,7 @@ const SignupClientForm = () => {
             placeholder="Teléfono"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
+            disabled={isLoading}
             required
           />
         </div>
@@ -182,6 +191,7 @@ const SignupClientForm = () => {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={isLoading}
             required
           />
         </div>
@@ -196,6 +206,7 @@ const SignupClientForm = () => {
             placeholder="Dirección"
             value={direccion}
             onChange={(e) => setDireccion(e.target.value)}
+            disabled={isLoading}
             required
           />
         </div>
@@ -210,6 +221,7 @@ const SignupClientForm = () => {
             placeholder="Contraseña"
             value={password}
             onChange={handlePasswordChange}
+            disabled={isLoading}
             required
           />
           {passwordError && <p className="error-message">{passwordError}</p>}
@@ -225,6 +237,7 @@ const SignupClientForm = () => {
             placeholder="Repetir Contraseña"
             value={repeatPassword}
             onChange={handleRepeatPasswordChange}
+            disabled={isLoading}
             required
           />
           {repeatPasswordError && <p className="error-message">{repeatPasswordError}</p>}
@@ -234,8 +247,18 @@ const SignupClientForm = () => {
         {error && <p className="error-message">{error}</p>}
 
         {/* Botón de registro */}
-        <button type="submit" className="registro-button">
-          Registrarse
+        <button
+          type="submit" 
+          className="registro-button"
+          disabled={isLoading} // Deshabilitar durante carga
+        >
+          {isLoading ? (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <LoadingSpinner />
+            </div>
+          ) : (
+            'Registrarse'
+          )}
         </button>
       </form>
     </div>

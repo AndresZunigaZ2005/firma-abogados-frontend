@@ -4,6 +4,7 @@
   align-items: center;
   padding: 20px;
   background-color: #f0f0f0; /* Fondo gris claro para el contenedor principal */
+  position: relative;
 }
 
 .card {
@@ -52,4 +53,9 @@
 
 .button:hover {
   background-color: #f0f0f0; /* Fondo gris claro al pasar el mouse */
+}
+
+.cases-container.loading-disabled {
+  pointer-events: none;
+  opacity: 0.7;
 }

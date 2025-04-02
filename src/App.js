@@ -2,13 +2,17 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import TopBar from './components/topBar/TopBar';
 import Login from './components/logInView/Login';
-import SignupClientForm from './components/registerClientView/SignupClientForm';
+import SignupClientForm from './components/clienteComponents/registerClientView/SignupClientForm';
 import Home from './components/info/Home';
 import About from './components/info/About';
-import UpdateProfileClient from './components/updateProfile/UpdateProfileClient';
+import UpdateProfileClient from './components/clienteComponents/updateProfile/UpdateProfileClient';
 import ForgotPassword from './components/forgotPassword/ForgotPassword';
 import SendCodePassword from './components/sendCode/sendCodePassword';
-import CasesView from './components/casesView/casesView';
+import CasesView from './components/clienteComponents/casesView/casesView';
+
+
+import CreateCase from './components/abogadoComponents/createCase/CreateCase';
+
 import Contact from './components/contact/Contact';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import './App.css'; // Importa el archivo CSS
@@ -62,6 +66,12 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            
+
+            {/*Rutas para abogados*/}
+            <Route path="/createCase" element={<CreateCase/>}/>
+
+
             {/* Ruta de redirección para rutas no válidas */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
