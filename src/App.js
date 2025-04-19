@@ -9,7 +9,7 @@ import UpdateProfileClient from './components/clienteComponents/updateProfile/Up
 import ForgotPassword from './components/forgotPassword/ForgotPassword';
 import SendCodePassword from './components/sendCode/sendCodePassword';
 import CasesView from './components/clienteComponents/casesView/casesView';
-
+import CasesViewAbogado from './components/abogadoComponents/CasesViewAbogado/casesViewAbogado';
 
 import CreateCase from './components/abogadoComponents/createCase/CreateCase';
 
@@ -71,7 +71,14 @@ function App() {
             {/*Rutas para abogados*/}
             <Route path="/createCase" element={<CreateCase/>}/>
 
-
+              <Route
+                  path="/viewCasesAbogado"
+                  element={
+                      <ProtectedRoute isAuthenticated={isAuthenticated}>
+                          <CasesViewAbogado />
+                      </ProtectedRoute>
+                  }
+              />
             {/* Ruta de redirección para rutas no válidas */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
