@@ -18,7 +18,7 @@ const Login = ({ onLogin }) => {
     setError(''); // Limpiar errores previos
 
     try {
-      const response = await fetch(process.env.REACT_APP_LOGIN_CLIENTE, {
+      const response = await fetch(process.env.REACT_APP_LOGIN_CUENTA, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

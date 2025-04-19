@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './CreateCase.css';
 import LoadingSpinner from '../../loading/LoadingSpinner';
-import { FaArrowRight, FaTimes } from 'react-icons/fa'; // Importar iconos
+import { FaArrowRight, FaTimes, FaLock } from 'react-icons/fa';
 
 const CreateCase = () => {
   const [nombreCaso, setNombreCaso] = useState('');
@@ -19,68 +19,85 @@ const CreateCase = () => {
     abogados: false
   });
 
-  // Función para buscar clientes (simulada - reemplazar con endpoint real)
-  const buscarCliente = async () => {
-    if (!clienteCedula.trim()) return;
-    
-    setSearchLoading(prev => ({ ...prev, clientes: true }));
-    try {
-      // Simulación de llamada a API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+  // Cargar abogado logueado automáticamente
+  useEffect(() => {
+    const cargarAbogadoLogueado = async () => {
+      const userEmail = localStorage.getItem('userEmail');
+      if (!userEmail) return;
       
-      // Validar si la cédula ya está en la lista
-      if (clientes.includes(clienteCedula)) {
-        throw new Error('Este cliente ya fue añadido');
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_EMAIL}/${encodeURIComponent(userEmail)}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+          }
+        });
+        
+        if (!response.ok) throw new Error('Error al cargar datos del abogado');
+        
+        const data = await response.json();
+        const abogado = data.respuesta;
+        
+        // Agregar abogado logueado como primer elemento
+        setAbogados([{ cedula: abogado.cedula, nombre: abogado.nombre }]);
+      } catch (err) {
+        console.error(err);
       }
-      
-      // Simulación de respuesta
-      return { cedula: clienteCedula, nombre: `Cliente ${clienteCedula}` };
-    } catch (err) {
-      setError(err.message);
-      return null;
-    } finally {
-      setSearchLoading(prev => ({ ...prev, clientes: false }));
-    }
-  };
+    };
+    
+    cargarAbogadoLogueado();
+  }, []);
 
-  // Función para buscar abogados (simulada - reemplazar con endpoint real)
-  const buscarAbogado = async () => {
-    if (!abogadoCedula.trim()) return;
+  // Función para buscar por cédula (común para clientes y abogados)
+  const buscarPorCedula = async (cedula, tipo) => {
+    if (!cedula.trim()) return null;
     
-    setSearchLoading(prev => ({ ...prev, abogados: true }));
+    setSearchLoading(prev => ({ ...prev, [tipo]: true }));
     try {
-      // Simulación de llamada a API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_CEDULA}/${cedula}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+        }
+      });
       
-      // Validar si la cédula ya está en la lista
-      if (abogados.includes(abogadoCedula)) {
-        throw new Error('Este abogado ya fue añadido');
-      }
+      if (!response.ok) throw new Error('No se encontró la cédula');
       
-      // Simulación de respuesta
-      return { cedula: abogadoCedula, nombre: `Abogado ${abogadoCedula}` };
+      const data = await response.json();
+      return {
+        cedula: data.respuesta.cedula,
+        nombre: data.respuesta.nombre
+      };
     } catch (err) {
       setError(err.message);
       return null;
     } finally {
-      setSearchLoading(prev => ({ ...prev, abogados: false }));
+      setSearchLoading(prev => ({ ...prev, [tipo]: false }));
     }
   };
 
   const agregarCliente = async () => {
     setError('');
-    const cliente = await buscarCliente();
+    const cliente = await buscarPorCedula(clienteCedula, 'clientes');
     if (cliente) {
-      setClientes([...clientes, cliente.cedula]);
+      // Verificar si ya existe
+      if (clientes.some(c => c.cedula === cliente.cedula)) {
+        setError('Este cliente ya fue añadido');
+        return;
+      }
+      setClientes([...clientes, cliente]);
       setClienteCedula('');
     }
   };
 
   const agregarAbogado = async () => {
     setError('');
-    const abogado = await buscarAbogado();
+    const abogado = await buscarPorCedula(abogadoCedula, 'abogados');
     if (abogado) {
-      setAbogados([...abogados, abogado.cedula]);
+      // Verificar si ya existe (incluyendo el abogado logueado)
+      if (abogados.some(a => a.cedula === abogado.cedula)) {
+        setError('Este abogado ya fue añadido');
+        return;
+      }
+      setAbogados([...abogados, abogado]);
       setAbogadoCedula('');
     }
   };
@@ -92,6 +109,9 @@ const CreateCase = () => {
   };
 
   const eliminarAbogado = (index) => {
+    // No permitir eliminar al abogado logueado (siempre está en índice 0)
+    if (index === 0) return;
+    
     const nuevosAbogados = [...abogados];
     nuevosAbogados.splice(index, 1);
     setAbogados(nuevosAbogados);
@@ -103,7 +123,7 @@ const CreateCase = () => {
     setError('');
     setSuccess('');
 
-    if (clientes.length === 0 || abogados.length === 0) {
+    if (clientes.length === 0 || abogados.length < 1) {
       setError('Debe agregar al menos un cliente y un abogado');
       setIsLoading(false);
       return;
@@ -114,8 +134,8 @@ const CreateCase = () => {
         nombreCaso,
         descripcionCaso,
         fechaInicio: fechaInicio || new Date().toISOString().split('T')[0],
-        idCliente: clientes,
-        idAbogados: abogados,
+        idCliente: clientes.map(c => c.cedula),
+        idAbogados: abogados.map(a => a.cedula),
         estadoCaso: 'INACTIVO'
       };
 
@@ -128,17 +148,15 @@ const CreateCase = () => {
         body: JSON.stringify(casoData)
       });
 
-      if (!response.ok) {
-        throw new Error('Error al crear el caso');
-      }
+      if (!response.ok) throw new Error('Error al crear el caso');
 
       setSuccess('Caso creado exitosamente');
-      // Limpiar formulario
+      // Limpiar formulario (excepto abogado logueado)
       setNombreCaso('');
       setDescripcionCaso('');
       setFechaInicio('');
       setClientes([]);
-      setAbogados([]);
+      setAbogados(abogados.slice(0, 1)); // Mantener solo el abogado logueado
     } catch (err) {
       setError(err.message);
     } finally {
@@ -174,7 +192,7 @@ const CreateCase = () => {
           </div>
 
           <div className="form-group">
-            <label>Fecha de Inicio</label>
+            <label>Fecha de Inicio:</label>
             <input
               type="date"
               value={fechaInicio}
@@ -218,9 +236,9 @@ const CreateCase = () => {
                   {clientes.length === 0 ? (
                     <div className="empty-list-message">No hay clientes añadidos</div>
                   ) : (
-                    clientes.map((cedula, index) => (
+                    clientes.map((cliente, index) => (
                       <div key={index} className="item-tag">
-                        {cedula}
+                        {cliente.nombre} ({cliente.cedula})
                         <button 
                           type="button" 
                           onClick={() => eliminarCliente(index)} 
@@ -271,17 +289,23 @@ const CreateCase = () => {
                   {abogados.length === 0 ? (
                     <div className="empty-list-message">No hay abogados añadidos</div>
                   ) : (
-                    abogados.map((cedula, index) => (
+                    abogados.map((abogado, index) => (
                       <div key={index} className="item-tag">
-                        {cedula}
-                        <button 
-                          type="button" 
-                          onClick={() => eliminarAbogado(index)} 
-                          className="remove-button"
-                          disabled={isLoading}
-                        >
-                          <FaTimes />
-                        </button>
+                        {abogado.nombre} ({abogado.cedula})
+                        {index === 0 ? (
+                          <span className="locked-icon" title="Abogado responsable">
+                            <FaLock />
+                          </span>
+                        ) : (
+                          <button 
+                            type="button" 
+                            onClick={() => eliminarAbogado(index)} 
+                            className="remove-button"
+                            disabled={isLoading}
+                          >
+                            <FaTimes />
+                          </button>
+                        )}
                       </div>
                     ))
                   )}

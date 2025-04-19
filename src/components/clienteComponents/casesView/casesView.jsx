@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./casesView.css";
-import LoadingSpinner from '../../loading/LoadingSpinner'; // Importa el spinner
+import LoadingSpinner from '../../loading/LoadingSpinner';
 
 const CasesView = () => {
   const [casos, setCasos] = useState([]);
-  const [isLoading, setIsLoading] = useState(true); // Estado de carga inicial
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate(); // Hook para navegación
 
   const fetchCasos = async () => {
-    setIsLoading(true); // Activar spinner al iniciar
+    setIsLoading(true);
     try {
       const userEmail = localStorage.getItem("userEmail");
       const jwt = localStorage.getItem("jwt");
@@ -53,8 +55,14 @@ const CasesView = () => {
       console.error("Error:", error);
       alert("No se pudieron cargar los casos. Por favor, recarga la página.");
     } finally {
-      setIsLoading(false); // Desactivar spinner al finalizar
+      setIsLoading(false);
     }
+  };
+
+  // Función para manejar el clic en "Ver más"
+  const handleVerMas = (caso) => {
+    // Navegar a la ruta /caso-detalle con el estado del caso
+    navigate('/', { state: { caso } }); //TODO Definir una ruta
   };
 
   useEffect(() => {
@@ -63,10 +71,8 @@ const CasesView = () => {
 
   return (
     <div className="cases-container">
-      {/* Spinner con fondo oscuro */}
       {isLoading && <LoadingSpinner />}
 
-      {/* Contenido principal */}
       {!isLoading && casos.length === 0 ? (
         <p>No hay casos disponibles.</p>
       ) : (
@@ -80,7 +86,12 @@ const CasesView = () => {
               </p>
             </div>
             <div className="card-actions">
-              <button className="button">Ver más</button>
+              <button 
+                className="button"
+                onClick={() => handleVerMas(caso)} // Pasar el caso completo
+              >
+                Ver más
+              </button>
             </div>
           </div>
         ))
