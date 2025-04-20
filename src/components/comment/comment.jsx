@@ -7,6 +7,7 @@ const ComentarioCaso = ({ casoId, idCuenta, onComentarioAgregado }) => {
     const [mensaje, setMensaje] = useState('');
   
     const manejarEnvio = async () => {
+      
       if (!asunto.trim() || !descripcion.trim()) {
         setMensaje("Por favor completa todos los campos.");
         return;
