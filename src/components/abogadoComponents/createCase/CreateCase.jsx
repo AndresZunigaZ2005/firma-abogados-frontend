@@ -6,17 +6,19 @@ import { FaArrowRight, FaTimes, FaLock } from 'react-icons/fa';
 const CreateCase = () => {
   const [nombreCaso, setNombreCaso] = useState('');
   const [descripcion, setDescripcion] = useState(''); // Cambiado de descripcionCaso a descripcion
-  const [fechaCreacion, setFechaCreacion] = useState(''); // Cambiado de fechaInicio a fechaCreacion
+  const [fechaCreacion, setFechaCreacion] = useState(
+    new Date().toISOString().split('T')[0] // Formato YYYY-MM-DD
+  );
   const [clienteCedula, setClienteCedula] = useState('');
   const [abogadoCedula, setAbogadoCedula] = useState('');
-  const [clients, setClients] = useState([]); // Cambiado de clientes a clients
+  const [clientes, setClients] = useState([]); // Cambiado de clientes a clientes
   const [abogados, setAbogados] = useState([]);
   const [estado, setEstado] = useState('INACTIVO'); // Cambiado de estadoCaso a estado
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState({
-    clients: false,
+    clientes: false,
     abogados: false
   });
 
@@ -48,7 +50,7 @@ const CreateCase = () => {
     cargarAbogadoLogueado();
   }, []);
 
-  // Función para buscar por cédula (común para clients y abogados)
+  // Función para buscar por cédula (común para clientes y abogados)
   const buscarPorCedula = async (cedula, tipo) => {
     if (!cedula.trim()) return null;
     
@@ -77,14 +79,14 @@ const CreateCase = () => {
 
   const agregarCliente = async () => {
     setError('');
-    const cliente = await buscarPorCedula(clienteCedula, 'clients');
+    const cliente = await buscarPorCedula(clienteCedula, 'clientes');
     if (cliente) {
       // Verificar si ya existe
-      if (clients.some(c => c.cedula === cliente.cedula)) {
+      if (clientes.some(c => c.cedula === cliente.cedula)) {
         setError('Este cliente ya fue añadido');
         return;
       }
-      setClients([...clients, cliente]);
+      setClients([...clientes, cliente]);
       setClienteCedula('');
     }
   };
@@ -104,7 +106,7 @@ const CreateCase = () => {
   };
 
   const eliminarCliente = (index) => {
-    const nuevosClients = [...clients];
+    const nuevosClients = [...clientes];
     nuevosClients.splice(index, 1);
     setClients(nuevosClients);
   };
@@ -118,13 +120,21 @@ const CreateCase = () => {
     setAbogados(nuevosAbogados);
   };
 
+  const formatFechaToLocalDateTime = (dateString) => {
+    if (!dateString) return null; // Nunca debería ocurrir porque el campo es obligatorio
+    
+    // Combina la fecha seleccionada con la hora fija 07:00 AM
+    const fechaConHora = `${dateString}T07:00:00`;
+    return fechaConHora; // Ejemplo: "2023-10-25T07:00:00"
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
     setSuccess('');
 
-    if (clients.length === 0 || abogados.length < 1) {
+    if (clientes.length === 0 || abogados.length < 1) {
       setError('Debe agregar al menos un cliente y un abogado');
       setIsLoading(false);
       return;
@@ -134,8 +144,8 @@ const CreateCase = () => {
       const casoData = {
         nombreCaso,
         descripcion, // Cambiado de descripcionCaso a descripcion
-        fechaCreacion: fechaCreacion || new Date().toISOString(), // Cambiado de fechaInicio a fechaCreacion
-        clients: clients.map(c => c.cedula), // Cambiado de idCliente a clients
+        fechaCreacion: formatFechaToLocalDateTime(fechaCreacion),
+        clientes: clientes.map(c => c.cedula), // Cambiado de idCliente a clientes
         abogados: abogados.map(a => a.cedula),
         estado // Cambiado de estadoCaso a estado
       };
@@ -211,16 +221,16 @@ const CreateCase = () => {
                   type="text"
                   value={clienteCedula}
                   onChange={(e) => setClienteCedula(e.target.value)}
-                  disabled={isLoading || searchLoading.clients}
+                  disabled={isLoading || searchLoading.clientes}
                   placeholder="Ingrese cédula del cliente"
                 />
                 <button
                   type="button"
                   onClick={agregarCliente}
                   className="add-button"
-                  disabled={isLoading || searchLoading.clients || !clienteCedula.trim()}
+                  disabled={isLoading || searchLoading.clientes || !clienteCedula.trim()}
                 >
-                  {searchLoading.clients ? (
+                  {searchLoading.clientes ? (
                     <LoadingSpinner small white />
                   ) : (
                     'Añadir'
@@ -234,10 +244,10 @@ const CreateCase = () => {
               
               <div className="items-list-container">
                 <div className="items-list">
-                  {clients.length === 0 ? (
+                  {clientes.length === 0 ? (
                     <div className="empty-list-message">No hay clientes añadidos</div>
                   ) : (
-                    clients.map((cliente, index) => (
+                    clientes.map((cliente, index) => (
                       <div key={index} className="item-tag">
                         {cliente.nombre} ({cliente.cedula})
                         <button 

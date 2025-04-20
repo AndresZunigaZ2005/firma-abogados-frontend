@@ -11,16 +11,16 @@ const CasesViewAbogado = () => {
   const fetchCasos = async () => {
     setIsLoading(true);
     try {
-      const userEmail = localStorage.getItem("userEmail");
+      const email = localStorage.getItem("userEmail");
       const jwt = localStorage.getItem("jwt");
 
-      if (!userEmail || !jwt) {
+      if (!email || !jwt) {
         throw new Error("Faltan credenciales.");
       }
 
       // Obtener abogado por email
       const abogadoResponse = await fetch(
-        `${process.env.REACT_APP_BUSCAR_POR_EMAIL}/${encodeURIComponent(userEmail)}`,
+        `${process.env.REACT_APP_BUSCAR_POR_EMAIL}/${encodeURIComponent(email)}`,
         {
           method: "GET",
           headers: {
@@ -33,11 +33,11 @@ const CasesViewAbogado = () => {
       if (!abogadoResponse.ok) throw new Error("Error al obtener el abogado.");
 
       const abogadoData = await abogadoResponse.json();
-      const idCuenta = abogadoData.respuesta.idCuenta;
+      const id = abogadoData.respuesta.cedula;
 
       // Obtener casos del abogado
       const casosResponse = await fetch(
-        `${process.env.REACT_APP_LISTAR_CASOS_ABOGADO}/${idCuenta}`,
+        `${process.env.REACT_APP_LISTAR_CASOS_ABOGADO}/${id}`,
         {
           method: "GET",
           headers: {
