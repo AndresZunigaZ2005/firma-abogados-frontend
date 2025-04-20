@@ -20,8 +20,8 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
 
   const fetchUserData = async () => {
     try {
-      const userEmail = localStorage.getItem('userEmail');
-      const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_EMAIL}/${userEmail}`, {
+      const email = localStorage.getItem('userEmail');
+      const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_EMAIL}/${email}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('jwt')}`,

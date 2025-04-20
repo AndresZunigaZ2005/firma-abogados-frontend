@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import './SignupClientForm.css'; // Archivo de estilos para el Registro
-import LoadingSpinner from '../../loading/LoadingSpinner'; // Importar el spinner
-import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importamos los iconos de ojo
+import './SignupClientForm.css';
+import LoadingSpinner from '../../loading/LoadingSpinner';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 
 const SignupClientForm = () => {
   const [cedula, setCedula] = useState('');
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState('');
-  const [direccion, setDireccion] = useState('');
+  const [direccion, setdireccion] = useState(''); // Cambiado de direccion a direccion
   const [password, setPassword] = useState('');
-  const [repeatPassword, setRepeatPassword] = useState('');
+  const [confirmarContrasenia, setConfirmarContrasenia] = useState(''); // Cambiado de repeatPassword
   const [passwordError, setPasswordError] = useState('');
-  const [repeatPasswordError, setRepeatPasswordError] = useState('');
+  const [confirmarContraseniaError, setConfirmarContraseniaError] = useState(''); // Cambiado de repeatPasswordError
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // Nuevo estado para el loading
-  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
-  const [showRepeatPassword, setShowRepeatPassword] = useState(false); // Estado para mostrar/ocultar repetir contraseña
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmarContrasenia, setShowConfirmarContrasenia] = useState(false); // Cambiado de showRepeatPassword
+  const navigate = useNavigate(); // Hook para navegación
 
   // Cargar datos desde localStorage al montar el componente
   useEffect(() => {
@@ -25,9 +27,9 @@ const SignupClientForm = () => {
     setNombre(savedData.nombre || '');
     setTelefono(savedData.telefono || '');
     setEmail(savedData.email || '');
-    setDireccion(savedData.direccion || '');
+    setdireccion(savedData.direccion || ''); // Cambiado
     setPassword(savedData.password || '');
-    setRepeatPassword(savedData.repeatPassword || '');
+    setConfirmarContrasenia(savedData.confirmarContrasenia || ''); // Cambiado
   }, []);
 
   // Guardar datos en localStorage cuando cambian
@@ -37,12 +39,12 @@ const SignupClientForm = () => {
       nombre,
       telefono,
       email,
-      direccion,
+      direccion, // Cambiado
       password,
-      repeatPassword,
+      confirmarContrasenia, // Cambiado
     };
     localStorage.setItem('formData', JSON.stringify(formData));
-  }, [cedula, nombre, telefono, email, direccion, password, repeatPassword]);
+  }, [cedula, nombre, telefono, email, direccion, password, confirmarContrasenia]);
 
   // Validar la contraseña
   const validatePassword = (value) => {
@@ -58,11 +60,11 @@ const SignupClientForm = () => {
   };
 
   // Validar que las contraseñas coincidan
-  const validateRepeatPassword = (value) => {
+  const validateConfirmarContrasenia = (value) => {
     if (value !== password) {
-      setRepeatPasswordError('Las contraseñas no coinciden.');
+      setConfirmarContraseniaError('Las contraseñas no coinciden.');
     } else {
-      setRepeatPasswordError('');
+      setConfirmarContraseniaError('');
     }
   };
 
@@ -71,38 +73,38 @@ const SignupClientForm = () => {
     const value = e.target.value;
     setPassword(value);
     validatePassword(value);
-    if (repeatPassword) validateRepeatPassword(repeatPassword);
+    if (confirmarContrasenia) validateConfirmarContrasenia(confirmarContrasenia);
   };
 
-  // Manejar cambios en el campo de repetir contraseña
-  const handleRepeatPasswordChange = (e) => {
+  // Manejar cambios en el campo de confirmar contraseña
+  const handleConfirmarContraseniaChange = (e) => {
     const value = e.target.value;
-    setRepeatPassword(value);
-    validateRepeatPassword(value);
+    setConfirmarContrasenia(value);
+    validateConfirmarContrasenia(value);
   };
 
-    // Alternar visibilidad de la contraseña
-    const togglePasswordVisibility = () => {
-      setShowPassword(!showPassword);
-    };
-  
-    // Alternar visibilidad de repetir contraseña
-    const toggleRepeatPasswordVisibility = () => {
-      setShowRepeatPassword(!showRepeatPassword);
-    };
+  // Alternar visibilidad de la contraseña
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  // Alternar visibilidad de confirmar contraseña
+  const toggleConfirmarContraseniaVisibility = () => {
+    setShowConfirmarContrasenia(!showConfirmarContrasenia);
+  };
 
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Activar loading al iniciar
+    setIsLoading(true);
     setError('');
-    // Validar que no haya errores en las contraseñas
-    if (passwordError || repeatPasswordError) {
+    
+    if (passwordError || confirmarContraseniaError) {
       setError('Por favor, corrige los errores en las contraseñas.');
       return;
     }
   
-    // Crear el objeto con los datos del formulario
+    // Crear el objeto con los datos del formulario, usando los nombres del DTO
     const datosCuenta = {
       cedula,
       nombre,
@@ -110,11 +112,11 @@ const SignupClientForm = () => {
       email,
       direccion,
       password,
-      rol: 'CLIENTE', // Este valor es estático
+      confirmarContrasenia, // Cambiado para coincidir con el DTO
+      rol: 'CLIENTE', // Cambiado de rol a rol para coincidir con el DTO
     };
   
     try {
-      // Hacer la solicitud POST al endpoint
       const response = await fetch(process.env.REACT_APP_CREAR_CUENTA, {
         method: 'POST',
         headers: {
@@ -129,27 +131,26 @@ const SignupClientForm = () => {
   
       const data = await response.json();
       console.log('Cuenta creada:', data);
-      setError(''); // Limpiar errores
-      alert('Cuenta creada exitosamente'); // Mostrar mensaje de éxito
-      localStorage.removeItem('formData'); // Limpiar datos guardados después de éxito
+      setError('');
+      alert('Cuenta creada exitosamente');
+      navigate('/');
+      localStorage.removeItem('formData');
     } catch (error) {
       console.error('Error:', error);
       setError('Hubo un error al crear la cuenta. Inténtalo de nuevo.');
-    } finally{
-      setIsLoading(false); // Desactivar loading al finalizar
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="registro-container">
-      {/* Encabezado */}
       <div className="registro-header">
         <h1>Registrarse</h1>
       </div>
 
-      {/* Formulario de registro */}
       <form className="registro-form" onSubmit={handleSubmit}>
-        {/* Campo de cédula */}
+        {/* Campos del formulario (sin cambios en la estructura, solo nombres de variables) */}
         <div className="form-group">
           <label htmlFor="cedula">Cédula</label>
           <input
@@ -164,7 +165,6 @@ const SignupClientForm = () => {
           />
         </div>
 
-        {/* Campo de nombre */}
         <div className="form-group">
           <label htmlFor="nombre">Nombre</label>
           <input
@@ -179,7 +179,6 @@ const SignupClientForm = () => {
           />
         </div>
 
-        {/* Campo de teléfono */}
         <div className="form-group">
           <label htmlFor="telefono">Teléfono</label>
           <input
@@ -194,7 +193,6 @@ const SignupClientForm = () => {
           />
         </div>
 
-        {/* Campo de correo electrónico */}
         <div className="form-group">
           <label htmlFor="email">Email</label>
           <input
@@ -209,22 +207,20 @@ const SignupClientForm = () => {
           />
         </div>
 
-        {/* Campo de dirección */}
         <div className="form-group">
-          <label htmlFor="direccion">Dirección</label>
+          <label htmlFor="direccion">Dirección</label> {/* Cambiado de direccion a direccion */}
           <input
             type="text"
             id="direccion"
             name="direccion"
             placeholder="Dirección"
-            value={direccion}
-            onChange={(e) => setDireccion(e.target.value)}
+            value={direccion} 
+            onChange={(e) => setdireccion(e.target.value)}
             disabled={isLoading}
             required
           />
         </div>
 
-        {/* Campo de contraseña con botón de visibilidad */}
         <div className="form-group password-group">
           <label htmlFor="password">Contraseña</label>
           <div className="password-input-container">
@@ -250,40 +246,37 @@ const SignupClientForm = () => {
           {passwordError && <p className="error-message">{passwordError}</p>}
         </div>
 
-        {/* Campo de repetir contraseña con botón de visibilidad */}
         <div className="form-group password-group">
-          <label htmlFor="repeat-password">Repetir Contraseña</label>
+          <label htmlFor="confirmar-contrasenia">Confirmar Contraseña</label> 
           <div className="password-input-container">
             <input
-              type={showRepeatPassword ? 'text' : 'password'}
-              id="repeat-password"
-              name="repeat-password"
-              placeholder="Repetir Contraseña"
-              value={repeatPassword}
-              onChange={handleRepeatPasswordChange}
+              type={showConfirmarContrasenia ? 'text' : 'password'} 
+              id="confirmar-contrasenia"
+              name="confirmarContrasenia"
+              placeholder="Confirmar Contraseña"
+              value={confirmarContrasenia}
+              onChange={handleConfirmarContraseniaChange} 
               disabled={isLoading}
               required
             />
             <button
               type="button"
               className="toggle-password-button"
-              onClick={toggleRepeatPasswordVisibility}
+              onClick={toggleConfirmarContraseniaVisibility}
               disabled={isLoading}
             >
-              {showRepeatPassword ? <FaEyeSlash /> : <FaEye />}
+              {showConfirmarContrasenia ? <FaEyeSlash /> : <FaEye />}
             </button>
           </div>
-          {repeatPasswordError && <p className="error-message">{repeatPasswordError}</p>}
+          {confirmarContraseniaError && <p className="error-message">{confirmarContraseniaError}</p>}
         </div>
 
-        {/* Mostrar errores de la API */}
         {error && <p className="error-message">{error}</p>}
 
-        {/* Botón de registro */}
         <button
           type="submit" 
           className="registro-button"
-          disabled={isLoading} // Deshabilitar durante carga
+          disabled={isLoading}
         >
           {isLoading ? (
             <div style={{ display: 'flex', justifyContent: 'center' }}>

@@ -33,6 +33,7 @@ const Login = ({ onLogin }) => {
       localStorage.setItem('userEmail', email);
       onLogin();
       navigate('/');
+      window.location.reload();
     } catch (error) {
       setError(error.message);
     } finally {

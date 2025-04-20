@@ -13,6 +13,9 @@ import CreateCase from './components/abogadoComponents/createCase/CreateCase';
 import Contact from './components/contact/Contact';
 
 
+import ViewCaseInformation from './components/clienteComponents/viewCaseInformation/ViewCaseInformation';
+
+
 import CasesViewAbogado from './components/abogadoComponents/CasesViewAbogado/CasesViewAbogado';
 import UpdateCase from './components/abogadoComponents/updateCase/UpdateCase'
 
@@ -112,6 +115,17 @@ function App() {
                 </UserProtectedRoute>
               }
             />
+
+            <Route
+              path="/viewCaseInformation"
+              element={
+                <UserProtectedRoute allowedTypes={['CLIENTE']}>
+                  <ViewCaseInformation />
+                </UserProtectedRoute>
+              }
+            />
+
+
             {/* Rutas protegidas para ABOGADOS */}
             <Route
               path="/abogado/viewCases"

@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { FaComment, FaInfoCircle, FaUserPlus, FaTrash, FaPaperclip } from 'react-icons/fa';
 import LoadingSpinner from '../../loading/LoadingSpinner';
 import DocumentsList from '../../documentList/DocumentsList';
+import Comentarios from '../../comentarios/Comentarios';
 import './UpdateCase.css';
 
 const UpdateCase = () => {
   const [caso, setCaso] = useState({
     codigo: '',
     nombreCaso: '',
-    descripcionCaso: '',
+    descriptionCaso: '', // Cambiado de descripcionCaso
     estadoCaso: 'INACTIVO',
-    idCliente: [],
-    idAbogados: [],
+    clientes: [], // Cambiado de idCliente
+    abogados: [], // Cambiado de idAbogados
     documentos: []
   });
   const [clientesInfo, setClientesInfo] = useState([]);
@@ -32,10 +33,10 @@ const UpdateCase = () => {
       setCaso({
         codigo: parsedCaso.codigo,
         nombreCaso: parsedCaso.nombreCaso,
-        descripcionCaso: parsedCaso.descripcionCaso,
+        descripcionCaso: parsedCaso.descripcionCaso, // Mapeo de nombre diferente
         estadoCaso: parsedCaso.estadoCaso || 'INACTIVO',
-        idCliente: parsedCaso.idCliente || [],
-        idAbogados: parsedCaso.idAbogados || [],
+        clientes: parsedCaso.idCliente || [], // Mapeo de nombre diferente
+        abogados: parsedCaso.idAbogados || [], // Mapeo de nombre diferente
         documentos: parsedCaso.documentos || []
       });
       
@@ -102,9 +103,10 @@ const UpdateCase = () => {
     if (!nuevaCedulaCliente.trim()) return;
     
     setIsLoading(true);
+    const cedula = nuevaCedulaCliente;
     try {
       const jwt = localStorage.getItem('jwt');
-      const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_CEDULA}/${nuevaCedulaCliente}`, {
+      const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_CEDULA}/${cedula}`, {
         headers: {
           'Authorization': `Bearer ${jwt}`
         }
@@ -118,7 +120,7 @@ const UpdateCase = () => {
       // Actualizar estado del caso y la información de clientes
       setCaso(prev => ({
         ...prev,
-        idCliente: [...prev.idCliente, nuevaCedulaCliente]
+        clients: [...prev.clients, nuevaCedulaCliente] // Cambiado de idCliente a clients
       }));
 
       setClientesInfo(prev => [...prev, { cedula: nuevaCedulaCliente, nombre: nombreCliente }]);
@@ -134,9 +136,10 @@ const UpdateCase = () => {
     if (!nuevaCedulaAbogado.trim()) return;
     
     setIsLoading(true);
+    const cedula = nuevaCedulaAbogado;
     try {
       const jwt = localStorage.getItem('jwt');
-      const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_CEDULA}/${nuevaCedulaAbogado}`, {
+      const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_CEDULA}/${cedula}`, {
         headers: {
           'Authorization': `Bearer ${jwt}`
         }
@@ -150,7 +153,7 @@ const UpdateCase = () => {
       // Actualizar estado del caso y la información de abogados
       setCaso(prev => ({
         ...prev,
-        idAbogados: [...prev.idAbogados, nuevaCedulaAbogado]
+        abogados: [...prev.abogados, nuevaCedulaAbogado] // Cambiado de idAbogados a abogados
       }));
 
       setAbogadosInfo(prev => [...prev, { cedula: nuevaCedulaAbogado, nombre: nombreAbogado }]);
@@ -165,7 +168,7 @@ const UpdateCase = () => {
   const eliminarCliente = (cedula) => {
     setCaso(prev => ({
       ...prev,
-      idCliente: prev.idCliente.filter(id => id !== cedula)
+      clients: prev.clients.filter(id => id !== cedula) // Cambiado de idCliente a clients
     }));
     setClientesInfo(prev => prev.filter(cliente => cliente.cedula !== cedula));
   };
@@ -173,7 +176,7 @@ const UpdateCase = () => {
   const eliminarAbogado = (cedula) => {
     setCaso(prev => ({
       ...prev,
-      idAbogados: prev.idAbogados.filter(id => id !== cedula)
+      abogados: prev.abogados.filter(id => id !== cedula) // Cambiado de idAbogados a abogados
     }));
     setAbogadosInfo(prev => prev.filter(abogado => abogado.cedula !== cedula));
   };
@@ -185,10 +188,10 @@ const UpdateCase = () => {
       const casoDTO = {
         idCaso: caso.codigo,
         nombreCaso: caso.nombreCaso,
-        descriptionCaso: caso.descripcionCaso,
+        descripcionCaso: caso.descripcionCaso, 
         estadoCaso: caso.estadoCaso.toUpperCase(),
-        clients: caso.idCliente,
-        abogados: caso.idAbogados
+        clientes: caso.idCliente, 
+        abogados: caso.idAbogados 
       };
 
       const response = await fetch(process.env.REACT_APP_ACTUALIZAR_CASO, {
@@ -211,24 +214,17 @@ const UpdateCase = () => {
     }
   };
 
-  const agregarComentario = async () => {
-    if (!nuevoComentario.trim()) return;
-
+  const handleAddComentario = async (comentario) => {
     setIsLoading(true);
     try {
-      const comentario = {
-        contenido: nuevoComentario,
-        fecha: new Date().toISOString(),
-        autor: localStorage.getItem('userId')
-      };
-
+      // Aquí iría la lógica para guardar en el backend si es necesario
       setCaso(prev => ({
         ...prev,
         comentarios: [...(prev.comentarios || []), comentario]
       }));
-      setNuevoComentario('');
     } catch (err) {
-      setError(err.message);
+      setError('Error al guardar el comentario');
+      throw err; // Para que el componente Comentarios pueda manejarlo
     } finally {
       setIsLoading(false);
     }
@@ -392,46 +388,18 @@ const UpdateCase = () => {
         )}
 
         {activeTab === 'comentarios' && (
-          <div className="comments-section">
-            <div className="comments-list">
-              {!caso.comentarios || caso.comentarios.length === 0 ? (
-                <p className="no-items">No hay comentarios aún</p>
-              ) : (
-                caso.comentarios.map((comentario, index) => (
-                  <div key={index} className="comment">
-                    <div className="comment-header">
-                      <span className="comment-author">{comentario.autor}</span>
-                      <span className="comment-date">
-                        {new Date(comentario.fecha).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="comment-content">{comentario.contenido}</div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="add-comment">
-              <textarea 
-                placeholder="Escribe un nuevo comentario..." 
-                value={nuevoComentario} 
-                onChange={(e) => setNuevoComentario(e.target.value)} 
-                disabled={isLoading} 
-              />
-              <button 
-                onClick={agregarComentario} 
-                disabled={isLoading || !nuevoComentario.trim()} 
-                className="submit-button"
-              >
-                Enviar Comentario
-              </button>
-            </div>
-          </div>
+          <Comentarios 
+            comentarios={caso.comentarios} 
+            onAddComentario={handleAddComentario}
+            isLoading={isLoading}
+          />
         )}
 
-        {activeTab === 'documentos' && (
+      {activeTab === 'documentos' && (
+        <div className="documents-section">
           <DocumentsList documentosIds={caso.documentos} />
-        )}
+        </div>
+      )}
       </div>
     </div>
   );

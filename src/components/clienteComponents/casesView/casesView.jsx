@@ -32,10 +32,10 @@ const CasesView = () => {
       if (!clienteResponse.ok) throw new Error("Error al obtener el cliente.");
 
       const clienteData = await clienteResponse.json();
-      const idCuenta = clienteData.respuesta.idCuenta;
+      const id = clienteData.respuesta.cedula;
 
       const casosResponse = await fetch(
-        `${process.env.REACT_APP_LISTAR_CASOS_CUENTA}/${idCuenta}`,
+        `${process.env.REACT_APP_LISTAR_CASOS_CUENTA}/${id}`,
         {
           method: "GET",
           headers: {
@@ -58,10 +58,15 @@ const CasesView = () => {
   };
 
   const handleVerMas = (caso) => {
-    // Guardar el caso completo en localStorage
+    // Usamos ambas opciones por redundancia
+    navigate('/viewCaseInformation', { 
+      state: { 
+        caso,
+        from: 'casesView' // Podemos añadir metadata adicional si es necesario
+      }
+     
+    });
     localStorage.setItem('casoSeleccionado', JSON.stringify(caso));
-    // Navegar a la ruta de detalle del caso
-    navigate('/viewCases');
   };
 
   useEffect(() => {
