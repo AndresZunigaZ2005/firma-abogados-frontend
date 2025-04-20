@@ -45,6 +45,49 @@
   width: 100%;
 }
 
+.password-group {
+  position: relative;
+}
+
+.password-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-container input {
+  padding-right: 40px;
+  width: 100%;
+}
+
+.toggle-password-button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-password-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle-password-button:hover:not(:disabled) {
+  color: #004aad;
+}
+
+.toggle-password-button svg {
+  width: 18px;
+  height: 18px;
+}
+
 .error-message {
   font-family: 'Poppins', sans-serif;
   font-size: 12px;

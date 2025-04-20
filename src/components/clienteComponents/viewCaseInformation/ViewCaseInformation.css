@@ -18,6 +18,12 @@
   margin-bottom: 30px;
 }
 
+.case-header h1 {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
 .case-header h3 {
   color: #004aad;
   font-size: 22px;
@@ -33,6 +39,15 @@
 
 .participants-section {
   margin-top: 30px;
+}
+
+.case-description h2,
+.participants-section h2 {
+  font-size: 20px;
+  margin: 20px 0 10px;
+  color: #444;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
 }
 
 .participants-section h4 {
@@ -67,4 +82,36 @@
   text-align: center;
   margin-top: 50px;
   font-size: 18px;
+}
+
+.case-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  color: #555;
+}
+
+.tab-button.active {
+  border-bottom-color: #004aad;
+  color: #004aad;
+  font-weight: bold;
+}
+
+.tab-button:hover:not(.active) {
+  color: #003882;
+}
+
+/* Estilos para la sección de documentos */
+.documents-section {
+  margin-top: 20px;
 }

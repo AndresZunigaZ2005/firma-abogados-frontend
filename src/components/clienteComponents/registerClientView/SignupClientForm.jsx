@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './SignupClientForm.css'; // Archivo de estilos para el Registro
 import LoadingSpinner from '../../loading/LoadingSpinner'; // Importar el spinner
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importamos los iconos de ojo
 
 const SignupClientForm = () => {
   const [cedula, setCedula] = useState('');
@@ -14,6 +15,8 @@ const SignupClientForm = () => {
   const [repeatPasswordError, setRepeatPasswordError] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Nuevo estado para el loading
+  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
+  const [showRepeatPassword, setShowRepeatPassword] = useState(false); // Estado para mostrar/ocultar repetir contraseña
 
   // Cargar datos desde localStorage al montar el componente
   useEffect(() => {
@@ -77,6 +80,16 @@ const SignupClientForm = () => {
     setRepeatPassword(value);
     validateRepeatPassword(value);
   };
+
+    // Alternar visibilidad de la contraseña
+    const togglePasswordVisibility = () => {
+      setShowPassword(!showPassword);
+    };
+  
+    // Alternar visibilidad de repetir contraseña
+    const toggleRepeatPasswordVisibility = () => {
+      setShowRepeatPassword(!showRepeatPassword);
+    };
 
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
@@ -211,35 +224,55 @@ const SignupClientForm = () => {
           />
         </div>
 
-        {/* Campo de contraseña */}
-        <div className="form-group">
+        {/* Campo de contraseña con botón de visibilidad */}
+        <div className="form-group password-group">
           <label htmlFor="password">Contraseña</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={handlePasswordChange}
-            disabled={isLoading}
-            required
-          />
+          <div className="password-input-container">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              id="password"
+              name="password"
+              placeholder="Contraseña"
+              value={password}
+              onChange={handlePasswordChange}
+              disabled={isLoading}
+              required
+            />
+            <button
+              type="button"
+              className="toggle-password-button"
+              onClick={togglePasswordVisibility}
+              disabled={isLoading}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
           {passwordError && <p className="error-message">{passwordError}</p>}
         </div>
 
-        {/* Campo de repetir contraseña */}
-        <div className="form-group">
+        {/* Campo de repetir contraseña con botón de visibilidad */}
+        <div className="form-group password-group">
           <label htmlFor="repeat-password">Repetir Contraseña</label>
-          <input
-            type="password"
-            id="repeat-password"
-            name="repeat-password"
-            placeholder="Repetir Contraseña"
-            value={repeatPassword}
-            onChange={handleRepeatPasswordChange}
-            disabled={isLoading}
-            required
-          />
+          <div className="password-input-container">
+            <input
+              type={showRepeatPassword ? 'text' : 'password'}
+              id="repeat-password"
+              name="repeat-password"
+              placeholder="Repetir Contraseña"
+              value={repeatPassword}
+              onChange={handleRepeatPasswordChange}
+              disabled={isLoading}
+              required
+            />
+            <button
+              type="button"
+              className="toggle-password-button"
+              onClick={toggleRepeatPasswordVisibility}
+              disabled={isLoading}
+            >
+              {showRepeatPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
           {repeatPasswordError && <p className="error-message">{repeatPasswordError}</p>}
         </div>
 

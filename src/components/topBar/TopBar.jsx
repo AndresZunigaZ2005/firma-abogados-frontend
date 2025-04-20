@@ -1,30 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './TopBar.css'; // Asegúrate de crear este archivo para los estilos
+import './TopBar.css';
 import ResponsiveLazyImage from '../assets/support/ResponsiveLazyImage';
 import logo from '../assets/images/logo.png';
 import profile from '../assets/images/profile.png';
 
 const TopBar = ({ isAuthenticated, onLogout }) => {
   const [userName, setUserName] = useState('');
+  const [userType, setUserType] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false); // Estado para el menú móvil
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const navigate = useNavigate();
 
-  // Obtener el nombre del usuario al cargar el componente
   useEffect(() => {
     if (isAuthenticated) {
       fetchUserData();
     }
   }, [isAuthenticated]);
 
-  // Función para obtener los datos del usuario desde el backend
   const fetchUserData = async () => {
     try {
-      // Obtener el email del localStorage
       const userEmail = localStorage.getItem('userEmail');
-
-      // Realizar la solicitud al endpoint con el email
       const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_EMAIL}/${userEmail}`, {
         method: 'GET',
         headers: {
@@ -38,35 +34,73 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
 
       const data = await response.json();
       const infoUser = data.respuesta;
-      // Obtener solo la primera palabra del nombre
       const firstName = infoUser.nombre.split(' ')[0];
-      setUserName(firstName); // Establecer el nombre en el estado
+      setUserName(firstName);
+      setUserType(infoUser.tipoCuenta); // Establecer el tipo de cuenta del usuario
     } catch (error) {
       console.error(error);
     }
   };
 
-  // Función para manejar el cierre de sesión
   const handleLogout = () => {
-    // Eliminar el JWT y el email del localStorage
     localStorage.removeItem('jwt');
     localStorage.removeItem('userEmail');
-
-    onLogout(); // Llama a la función de cierre de sesión
-    setShowDropdown(false); // Oculta el menú desplegable
-    navigate('/'); // Redirige al usuario a la página de inicio
+    onLogout();
+    setShowDropdown(false);
+    navigate('/');
   };
 
-  // Función para manejar la navegación desde los botones del menú desplegable
   const handleNavigation = (path) => {
-    navigate(path); // Navega a la ruta especificada
-    setShowDropdown(false); // Oculta el menú desplegable
-    setShowMobileMenu(false); // Oculta el menú móvil
+    navigate(path);
+    setShowDropdown(false);
+    setShowMobileMenu(false);
+  };
+
+  const renderUserSpecificOptions = () => {
+    switch (userType) {
+      case 'CLIENTE':
+        return (
+          <>
+            <button onClick={() => handleNavigation('/viewCases')}>
+              Ver casos
+            </button>
+            <button onClick={() => handleNavigation('/realizar-pago')}>
+              Realizar pago
+            </button>
+          </>
+        );
+      case 'ABOGADO':
+        return (
+          <>
+            <button onClick={() => handleNavigation('/abogado/viewCases')}>
+              Ver casos
+            </button>
+            <button onClick={() => handleNavigation('/abogado/createCase')}>
+              Crear caso
+            </button>
+          </>
+        );
+      case 'ADMIN':
+        return (
+          <>
+            <button onClick={() => handleNavigation('/addLawyer')}>
+              Añadir abogado
+            </button>
+            <button onClick={() => handleNavigation('/generateStatistics')}>
+              Ver estadísticas
+            </button>
+            <button onClick={() => handleNavigation('/generateReceipt')}>
+              Generar factura
+            </button>
+          </>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
     <div className="top-bar">
-      {/* Logo y texto "La Ley del Hielo" */}
       <Link to="/" className="logo-container">
         <ResponsiveLazyImage
           imagePath={logo}
@@ -76,12 +110,10 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
         <h1>La Ley del Hielo</h1>
       </Link>
 
-      {/* Menú de hamburguesa para móviles */}
       <div className="hamburger-menu" onClick={() => setShowMobileMenu(!showMobileMenu)}>
-        <div className="hamburger-icon">&#9776;</div> {/* Ícono de tres rayas */}
+        <div className="hamburger-icon">&#9776;</div>
       </div>
 
-      {/* Navegación y autenticación */}
       <div className={`right-section ${showMobileMenu ? 'mobile-visible' : ''}`}>
         <nav className="navigation">
           <Link to="/aboutus" onClick={() => setShowMobileMenu(false)}>Sobre Nosotros</Link>
@@ -89,7 +121,6 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
         </nav>
 
         {isAuthenticated ? (
-          // Si el usuario está autenticado, muestra el nombre y el menú desplegable
           <div className="user-menu">
             <div
               className="user-info"
@@ -101,15 +132,13 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
                 altText="Logo de la aplicación"
                 size="small"
               />
-              <span className="dropdown-arrow">▼</span> {/* Flecha hacia abajo */}
+              <span className="dropdown-arrow">▼</span>
             </div>
 
             {showDropdown && (
               <div className="dropdown-menu">
-                <button onClick={() => handleNavigation('/viewCases')}>
-                  Ver casos
-                </button>
-                <button onClick={() => handleNavigation('/updateProfileClient')}>
+                {renderUserSpecificOptions()}
+                <button onClick={() => handleNavigation('/updateProfile')}>
                   Actualizar perfil
                 </button>
                 <button onClick={handleLogout}>Salir</button>
@@ -117,7 +146,6 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
             )}
           </div>
         ) : (
-          // Si el usuario no está autenticado, muestra los enlaces de inicio de sesión y registro
           <div className="auth-links">
             <Link to="/login" onClick={() => setShowMobileMenu(false)}>Iniciar sesión</Link>
             <Link to="/signup" onClick={() => setShowMobileMenu(false)}>Registrarse</Link>

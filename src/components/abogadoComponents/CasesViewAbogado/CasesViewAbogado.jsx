@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./casesView.css";
-import LoadingSpinner from '../../loading/LoadingSpinner';
+import "./CasesViewAbogado.css";
+import LoadingSpinner from "../../loading/LoadingSpinner";
 
-const CasesView = () => {
+const CasesViewAbogado = () => {
   const [casos, setCasos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -18,7 +18,8 @@ const CasesView = () => {
         throw new Error("Faltan credenciales.");
       }
 
-      const clienteResponse = await fetch(
+      // Obtener abogado por email
+      const abogadoResponse = await fetch(
         `${process.env.REACT_APP_BUSCAR_POR_EMAIL}/${encodeURIComponent(userEmail)}`,
         {
           method: "GET",
@@ -29,13 +30,14 @@ const CasesView = () => {
         }
       );
 
-      if (!clienteResponse.ok) throw new Error("Error al obtener el cliente.");
+      if (!abogadoResponse.ok) throw new Error("Error al obtener el abogado.");
 
-      const clienteData = await clienteResponse.json();
-      const idCuenta = clienteData.respuesta.idCuenta;
+      const abogadoData = await abogadoResponse.json();
+      const idCuenta = abogadoData.respuesta.idCuenta;
 
+      // Obtener casos del abogado
       const casosResponse = await fetch(
-        `${process.env.REACT_APP_LISTAR_CASOS_CUENTA}/${idCuenta}`,
+        `${process.env.REACT_APP_LISTAR_CASOS_ABOGADO}/${idCuenta}`,
         {
           method: "GET",
           headers: {
@@ -57,23 +59,22 @@ const CasesView = () => {
     }
   };
 
-  const handleVerMas = (caso) => {
-    // Guardar el caso completo en localStorage
-    localStorage.setItem('casoSeleccionado', JSON.stringify(caso));
-    // Navegar a la ruta de detalle del caso
-    navigate('/viewCases');
-  };
-
   useEffect(() => {
     fetchCasos();
   }, []);
 
+  const redirigirActualizar = (caso) => {
+    // Guardar el caso completo en localStorage
+    localStorage.setItem("casoSeleccionado", JSON.stringify(caso));
+    navigate("/abogado/updateCase");
+  };
+
   return (
-    <div className="cases-container">
+    <div className={`cases-container ${isLoading ? "loading-disabled" : ""}`}>
       {isLoading && <LoadingSpinner />}
 
       {!isLoading && casos.length === 0 ? (
-        <p>No hay casos disponibles.</p>
+        <p>No hay casos asignados.</p>
       ) : (
         casos.map((caso, index) => (
           <div key={caso.codigo} className="card">
@@ -85,11 +86,11 @@ const CasesView = () => {
               </p>
             </div>
             <div className="card-actions">
-              <button 
+              <button
                 className="button"
-                onClick={() => handleVerMas(caso)}
+                onClick={() => redirigirActualizar(caso)}
               >
-                Ver más
+                Actualizar
               </button>
             </div>
           </div>
@@ -99,4 +100,4 @@ const CasesView = () => {
   );
 };
 
-export default CasesView;
+export default CasesViewAbogado;

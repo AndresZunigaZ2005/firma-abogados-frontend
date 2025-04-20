@@ -1,0 +1,63 @@
+.cases-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-color: #f0f0f0; /* Fondo gris claro para el contenedor principal */
+    position: relative;
+  }
+  
+  .card {
+    border: 1px solid #ccc;
+    border-radius: 20px; /* Bordes más redondeados */
+    padding: 20px;
+    margin: 10px 20px; /* Margen vertical de 10px y horizontal de 20px */
+    width: calc(90% - 40px); /* Ajusta el ancho para considerar los márgenes */
+    max-width: 100%; /* Asegura que no exceda el ancho de la pantalla */
+    background-color: #5096a9; /* Fondo azul */
+    color: #ffffff; /* Letras blancas */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-content {
+    margin-bottom: 16px;
+  }
+  
+  .title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #ffffff; /* Letras blancas */
+  }
+  
+  .description {
+    font-size: 16px;
+    color: #ffffff; /* Letras blancas */
+    margin-bottom: 12px;
+  }
+  
+  .card-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .button {
+    padding: 8px 16px;
+    background-color: #ffffff; /* Fondo blanco */
+    color: #004aad; /* Letras azules */
+    border: none;
+    border-radius: 20px; /* Bordes redondeados para el botón */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .button:hover {
+    background-color: #f0f0f0; /* Fondo gris claro al pasar el mouse */
+  }
+  
+  .cases-container.loading-disabled {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  

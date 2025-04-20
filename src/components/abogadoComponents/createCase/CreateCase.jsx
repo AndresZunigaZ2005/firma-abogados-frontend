@@ -5,17 +5,18 @@ import { FaArrowRight, FaTimes, FaLock } from 'react-icons/fa';
 
 const CreateCase = () => {
   const [nombreCaso, setNombreCaso] = useState('');
-  const [descripcionCaso, setDescripcionCaso] = useState('');
-  const [fechaInicio, setFechaInicio] = useState('');
+  const [descripcion, setDescripcion] = useState(''); // Cambiado de descripcionCaso a descripcion
+  const [fechaCreacion, setFechaCreacion] = useState(''); // Cambiado de fechaInicio a fechaCreacion
   const [clienteCedula, setClienteCedula] = useState('');
   const [abogadoCedula, setAbogadoCedula] = useState('');
-  const [clientes, setClientes] = useState([]);
+  const [clients, setClients] = useState([]); // Cambiado de clientes a clients
   const [abogados, setAbogados] = useState([]);
+  const [estado, setEstado] = useState('INACTIVO'); // Cambiado de estadoCaso a estado
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState({
-    clientes: false,
+    clients: false,
     abogados: false
   });
 
@@ -47,7 +48,7 @@ const CreateCase = () => {
     cargarAbogadoLogueado();
   }, []);
 
-  // Función para buscar por cédula (común para clientes y abogados)
+  // Función para buscar por cédula (común para clients y abogados)
   const buscarPorCedula = async (cedula, tipo) => {
     if (!cedula.trim()) return null;
     
@@ -76,14 +77,14 @@ const CreateCase = () => {
 
   const agregarCliente = async () => {
     setError('');
-    const cliente = await buscarPorCedula(clienteCedula, 'clientes');
+    const cliente = await buscarPorCedula(clienteCedula, 'clients');
     if (cliente) {
       // Verificar si ya existe
-      if (clientes.some(c => c.cedula === cliente.cedula)) {
+      if (clients.some(c => c.cedula === cliente.cedula)) {
         setError('Este cliente ya fue añadido');
         return;
       }
-      setClientes([...clientes, cliente]);
+      setClients([...clients, cliente]);
       setClienteCedula('');
     }
   };
@@ -103,9 +104,9 @@ const CreateCase = () => {
   };
 
   const eliminarCliente = (index) => {
-    const nuevosClientes = [...clientes];
-    nuevosClientes.splice(index, 1);
-    setClientes(nuevosClientes);
+    const nuevosClients = [...clients];
+    nuevosClients.splice(index, 1);
+    setClients(nuevosClients);
   };
 
   const eliminarAbogado = (index) => {
@@ -123,7 +124,7 @@ const CreateCase = () => {
     setError('');
     setSuccess('');
 
-    if (clientes.length === 0 || abogados.length < 1) {
+    if (clients.length === 0 || abogados.length < 1) {
       setError('Debe agregar al menos un cliente y un abogado');
       setIsLoading(false);
       return;
@@ -132,11 +133,11 @@ const CreateCase = () => {
     try {
       const casoData = {
         nombreCaso,
-        descripcionCaso,
-        fechaInicio: fechaInicio || new Date().toISOString().split('T')[0],
-        idCliente: clientes.map(c => c.cedula),
-        idAbogados: abogados.map(a => a.cedula),
-        estadoCaso: 'INACTIVO'
+        descripcion, // Cambiado de descripcionCaso a descripcion
+        fechaCreacion: fechaCreacion || new Date().toISOString(), // Cambiado de fechaInicio a fechaCreacion
+        clients: clients.map(c => c.cedula), // Cambiado de idCliente a clients
+        abogados: abogados.map(a => a.cedula),
+        estado // Cambiado de estadoCaso a estado
       };
 
       const response = await fetch(process.env.REACT_APP_CREAR_CASO, {
@@ -153,9 +154,9 @@ const CreateCase = () => {
       setSuccess('Caso creado exitosamente');
       // Limpiar formulario (excepto abogado logueado)
       setNombreCaso('');
-      setDescripcionCaso('');
-      setFechaInicio('');
-      setClientes([]);
+      setDescripcion('');
+      setFechaCreacion('');
+      setClients([]);
       setAbogados(abogados.slice(0, 1)); // Mantener solo el abogado logueado
     } catch (err) {
       setError(err.message);
@@ -184,19 +185,19 @@ const CreateCase = () => {
           <div className="form-group">
             <label>Descripción:</label>
             <textarea
-              value={descripcionCaso}
-              onChange={(e) => setDescripcionCaso(e.target.value)}
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
               disabled={isLoading}
               required
             />
           </div>
 
           <div className="form-group">
-            <label>Fecha de Inicio:</label>
+            <label>Fecha de Creación:</label>
             <input
               type="date"
-              value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
+              value={fechaCreacion}
+              onChange={(e) => setFechaCreacion(e.target.value)}
               disabled={isLoading}
               required
             />
@@ -210,16 +211,16 @@ const CreateCase = () => {
                   type="text"
                   value={clienteCedula}
                   onChange={(e) => setClienteCedula(e.target.value)}
-                  disabled={isLoading || searchLoading.clientes}
+                  disabled={isLoading || searchLoading.clients}
                   placeholder="Ingrese cédula del cliente"
                 />
                 <button
                   type="button"
                   onClick={agregarCliente}
                   className="add-button"
-                  disabled={isLoading || searchLoading.clientes || !clienteCedula.trim()}
+                  disabled={isLoading || searchLoading.clients || !clienteCedula.trim()}
                 >
-                  {searchLoading.clientes ? (
+                  {searchLoading.clients ? (
                     <LoadingSpinner small white />
                   ) : (
                     'Añadir'
@@ -233,10 +234,10 @@ const CreateCase = () => {
               
               <div className="items-list-container">
                 <div className="items-list">
-                  {clientes.length === 0 ? (
+                  {clients.length === 0 ? (
                     <div className="empty-list-message">No hay clientes añadidos</div>
                   ) : (
-                    clientes.map((cliente, index) => (
+                    clients.map((cliente, index) => (
                       <div key={index} className="item-tag">
                         {cliente.nombre} ({cliente.cedula})
                         <button 

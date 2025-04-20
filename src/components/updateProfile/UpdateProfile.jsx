@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import './UpdateProfileClient.css';
-import LoadingSpinner from '../../loading/LoadingSpinner'; // Asegúrate de tener esta ruta correcta
+import { useNavigate } from 'react-router-dom'; // Importar useNavigate
+import './UpdateProfile.css';
+import LoadingSpinner from '../loading/LoadingSpinner'; // Asegúrate de tener esta ruta correcta
 
 const UpdateProfileClient = () => {
   const [nombre, setNombre] = useState('');
@@ -10,6 +11,7 @@ const UpdateProfileClient = () => {
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Estado para controlar el loading
+  const navigate = useNavigate(); // Hook para navegación
 
   const fetchUserData = async () => {
     setIsLoading(true); // Activar loading al iniciar
@@ -76,6 +78,7 @@ const UpdateProfileClient = () => {
       }
 
       alert('Perfil actualizado con éxito');
+      navigate('/'); // Navegar a la ruta principal después de actualizar
     } catch (error) {
       console.error(error);
       alert('Error al actualizar el perfil');

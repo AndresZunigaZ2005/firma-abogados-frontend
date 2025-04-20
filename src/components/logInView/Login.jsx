@@ -4,18 +4,20 @@ import './Login.css';
 import ResponsiveLazyImage from '../assets/support/ResponsiveLazyImage';
 import Logo from '../assets/images/logo.png';
 import LoadingSpinner from '../loading/LoadingSpinner';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importamos los iconos de ojo
 
 const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // Nuevo estado para mostrar/ocultar contraseña
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(''); // Limpiar errores previos
+    setError('');
 
     try {
       const response = await fetch(process.env.REACT_APP_LOGIN_CUENTA, {
@@ -36,6 +38,10 @@ const Login = ({ onLogin }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -59,21 +65,31 @@ const Login = ({ onLogin }) => {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading} // Deshabilitar campo durante carga
+              disabled={isLoading}
             />
           </div>
 
-          <div className="form-group">
+          <div className="form-group password-group">
             <label htmlFor="password">Contraseña</label>
-            <input
-              type="password"
-              id="password"
-              placeholder="Contraseña"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading} // Deshabilitar campo durante carga
-            />
+            <div className="password-input-container">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                placeholder="Contraseña"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                className="toggle-password-button"
+                onClick={togglePasswordVisibility}
+                disabled={isLoading}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
 
           {error && <div className="error-message">{error}</div>}
@@ -82,16 +98,15 @@ const Login = ({ onLogin }) => {
             <a href="/sendcode">Recuperar Contraseña</a>
           </div>
 
-          {/* Botón con spinner superpuesto */}
           <div className="submit-button-container">
             <button
               type="submit"
               className="login-button"
-              disabled={isLoading} // Deshabilitar botón durante carga
+              disabled={isLoading}
             >
               {isLoading ? (
                 <div className="spinner-inside-button">
-                  <LoadingSpinner /> {/* Spinner pequeño */}
+                  <LoadingSpinner />
                 </div>
               ) : (
                 'Iniciar sesión'
