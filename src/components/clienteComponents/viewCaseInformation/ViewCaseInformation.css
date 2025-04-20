@@ -1,0 +1,117 @@
+.view-case-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+}
+
+.view-case-container h1 {
+  color: #2c3e50;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.view-case-container h2 {
+  color: #34495e;
+  font-size: 20px;
+  margin-bottom: 30px;
+}
+
+.case-header h1 {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.case-header h3 {
+  color: #004aad;
+  font-size: 22px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.case-description {
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.participants-section {
+  margin-top: 30px;
+}
+
+.case-description h2,
+.participants-section h2 {
+  font-size: 20px;
+  margin: 20px 0 10px;
+  color: #444;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+}
+
+.participants-section h4 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.participants-list {
+  margin-bottom: 20px;
+  line-height: 1.8;
+}
+
+.participant-name {
+  cursor: pointer;
+  color: #004aad;
+  transition: color 0.2s;
+  margin-right: 5px;
+}
+
+.participant-name:hover {
+  color: #003366;
+  text-decoration: underline;
+}
+
+.no-participants {
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+.error-message {
+  color: #e74c3c;
+  text-align: center;
+  margin-top: 50px;
+  font-size: 18px;
+}
+
+.case-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  color: #555;
+}
+
+.tab-button.active {
+  border-bottom-color: #004aad;
+  color: #004aad;
+  font-weight: bold;
+}
+
+.tab-button:hover:not(.active) {
+  color: #003882;
+}
+
+/* Estilos para la sección de documentos */
+.documents-section {
+  margin-top: 20px;
+}
