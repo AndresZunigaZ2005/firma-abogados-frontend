@@ -8,46 +8,72 @@ const DocumentsList = ({ documentosIds }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showUpload, setShowUpload] = useState(false);
-  const [nuevoDocumento, setNuevoDocumento] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [caso, setCaso] = useState(null);
 
+  // Cargar el caso del localStorage al montar el componente
   useEffect(() => {
-    const fetchNombresDocumentos = async () => {
-      if (!documentosIds || documentosIds.length === 0) return;
-      
-      setIsLoading(true);
+    const casoGuardado = localStorage.getItem('casoSeleccionado');
+    if (casoGuardado) {
       try {
-        const nombres = await Promise.all(
-          documentosIds.map(async (id) => {
-            const response = await fetch(`${process.env.REACT_APP_OBTENER_NOMBRE_DOCUMENTO}/${id}`, {
-              headers: {
-                'Authorization': `Bearer ${localStorage.getItem('jwt')}`
-              }
-            });
-            
-            if (!response.ok) throw new Error('Error al obtener nombre del documento');
-            
-            const data = await response.json();
-            return {
-              id,
-              nombre: data.nombreDocumento || `Documento ${id}`
-            };
-          })
-        );
-        
-        setDocumentos(nombres);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
+        const parsedCaso = JSON.parse(casoGuardado);
+        if (parsedCaso.codigo) {
+          setCaso(parsedCaso);
+        }
+      } catch (error) {
+        console.error('Error al parsear caso:', error);
       }
-    };
+    }
+  }, []);
 
-    fetchNombresDocumentos();
+  // Función para cargar nombres de documentos (reutilizable)
+  const fetchNombresDocumentos = async (ids) => {
+    if (!ids || ids.length === 0) {
+      setDocumentos([]);
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      const nombres = await Promise.all(
+        ids.map(async (id) => {
+          const response = await fetch(`${process.env.REACT_APP_OBTENER_NOMBRE_DOCUMENTO}/${id}`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error('Error al obtener nombre del documento');
+          }
+          
+          // Leer la respuesta como texto plano
+          const nombreDocumento = await response.text();
+          
+          return {
+            id,
+            nombre: nombreDocumento || `Documento ${id}`
+          };
+        })
+      );
+      
+      setDocumentos(nombres);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Cargar nombres de documentos al montar el componente o cuando cambian los IDs
+  useEffect(() => {
+    fetchNombresDocumentos(documentosIds);
   }, [documentosIds]);
 
-  const descargarDocumento = async (idDocumento) => {
+  const descargarDocumento = async (id) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_DESCARGAR_DOCUMENTO}/${idDocumento}`, {
+      setIsLoading(true);
+      const response = await fetch(`${process.env.REACT_APP_DESCARGAR_DOCUMENTO}/${id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('jwt')}`
         }
@@ -60,25 +86,31 @@ const DocumentsList = ({ documentosIds }) => {
       const link = document.createElement('a');
       link.href = url;
       
-      // Buscar el nombre del documento correspondiente
-      const documento = documentos.find(doc => doc.id === idDocumento);
-      link.download = documento?.nombre || `documento-${idDocumento}`;
+      // Obtener el nombre del documento para el nombre de archivo de descarga
+      const documento = documentos.find(doc => doc.id === id);
+      link.download = documento?.nombre || `documento-${id}`;
       
       link.click();
+      link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSubirDocumento = async (e) => {
     e.preventDefault();
-    if (!nuevoDocumento) return;
+    if (!selectedFile || !caso?.codigo) return;
 
     setIsLoading(true);
+    setError('');
+    
     try {
       const formData = new FormData();
-      formData.append('documento', nuevoDocumento);
+      formData.append('archivo', selectedFile);
+      formData.append('idCaso', caso.codigo);
 
       const response = await fetch(process.env.REACT_APP_SUBIR_DOCUMENTO, {
         method: 'POST',
@@ -88,15 +120,45 @@ const DocumentsList = ({ documentosIds }) => {
         body: formData
       });
 
-      if (!response.ok) throw new Error('Error al subir documento');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Error al subir documento');
+      }
 
-      const data = await response.json();
-      setDocumentos(prev => [...prev, {
-        id: data.idDocumento,
-        nombre: nuevoDocumento.name
-      }]);
-      setNuevoDocumento(null);
+      let idDocumentoNuevo;
+
+      const contentType = response.headers.get('content-type');
+
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        idDocumentoNuevo = data.idDocumento;
+      } else {
+        const text = await response.text();
+        console.warn('Respuesta no JSON:', text);
+        
+        // Aquí podrías intentar extraer el ID del documento si viene incluido en el texto,
+        // pero si no se puede, muestra error:
+        throw new Error('El servidor no devolvió datos válidos para continuar.');
+      }
+
+      if (!idDocumentoNuevo) {
+        throw new Error('No se pudo obtener el ID del nuevo documento');
+      }
+
+      // Actualizar el caso en localStorage
+      const casoActualizado = {
+        ...caso,
+        documentos: [...(caso.documentos || []), idDocumentoNuevo]
+      };
+      localStorage.setItem('casoSeleccionado', JSON.stringify(casoActualizado));
+      
+      // Forzar recarga de todos los documentos (incluyendo el nuevo)
+      await fetchNombresDocumentos(casoActualizado.documentos);
+      
+      // Resetear el formulario
+      setSelectedFile(null);
       setShowUpload(false);
+      window.location.reload();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -115,6 +177,7 @@ const DocumentsList = ({ documentosIds }) => {
         <button 
           className="upload-button"
           onClick={() => setShowUpload(!showUpload)}
+          disabled={!caso?.codigo}
         >
           <FaUpload /> Subir Documento
         </button>
@@ -128,11 +191,11 @@ const DocumentsList = ({ documentosIds }) => {
               <input 
                 type="file" 
                 id="documento" 
-                onChange={(e) => setNuevoDocumento(e.target.files[0])} 
+                onChange={(e) => setSelectedFile(e.target.files[0])} 
                 disabled={isLoading} 
               />
               <label htmlFor="documento" className="file-label">
-                {nuevoDocumento ? nuevoDocumento.name : 'Seleccionar archivo'}
+                {selectedFile ? selectedFile.name : 'Seleccionar archivo'}
               </label>
             </div>
           </div>
@@ -143,15 +206,16 @@ const DocumentsList = ({ documentosIds }) => {
               className="cancel-button"
               onClick={() => {
                 setShowUpload(false);
-                setNuevoDocumento(null);
+                setSelectedFile(null);
               }}
+              disabled={isLoading}
             >
               Cancelar
             </button>
             <button 
               type="submit" 
               className="submit-button"
-              disabled={isLoading || !nuevoDocumento}
+              disabled={isLoading || !selectedFile || !caso?.codigo}
             >
               {isLoading ? 'Subiendo...' : 'Subir'}
             </button>

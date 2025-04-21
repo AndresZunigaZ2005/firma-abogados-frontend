@@ -2,39 +2,12 @@ import React, { useState } from 'react';
 import LoadingSpinner from '../loading/LoadingSpinner';
 import './EmailForm.css';
 
-const EmailForm = () => {
-  const [destinatarios, setDestinatarios] = useState([]);
-  const [nuevoDestinatario, setNuevoDestinatario] = useState('');
+const EmailForm = ({ idCaso }) => {
   const [asunto, setAsunto] = useState('');
   const [cuerpo, setCuerpo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  const agregarDestinatario = () => {
-    if (!nuevoDestinatario.trim()) return;
-    
-    // Validar formato de email
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nuevoDestinatario)) {
-      setError('Por favor ingrese un email válido');
-      return;
-    }
-    
-    if (destinatarios.includes(nuevoDestinatario)) {
-      setError('Este email ya está en la lista de destinatarios');
-      return;
-    }
-    
-    setDestinatarios([...destinatarios, nuevoDestinatario]);
-    setNuevoDestinatario('');
-    setError('');
-  };
-
-  const eliminarDestinatario = (index) => {
-    const nuevosDestinatarios = [...destinatarios];
-    nuevosDestinatarios.splice(index, 1);
-    setDestinatarios(nuevosDestinatarios);
-  };
 
   const enviarCorreo = async (e) => {
     e.preventDefault();
@@ -42,28 +15,26 @@ const EmailForm = () => {
     setError('');
     setSuccess('');
 
-    if (destinatarios.length === 0) {
-      setError('Debe agregar al menos un destinatario');
-      setIsLoading(false);
-      return;
-    }
-
     if (!asunto.trim()) {
       setError('El asunto es requerido');
       setIsLoading(false);
       return;
     }
 
+    if (!idCaso) {
+      setError('No se pudo identificar el caso asociado');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const correoData = {
-        destinatarios,
+        idCaso, // Usamos el idCaso pasado como prop
         asunto,
-        cuerpo,
-        // El remitente se manejará en el backend
+        cuerpo
       };
 
-      // Endpoint de ejemplo: REACT_APP_ENVIAR_CORREO
-      const response = await fetch(process.env.REACT_APP_ENVIAR_CORREO, {
+      const response = await fetch(process.env.REACT_APP_ENVIAR_CORREO_SOBRE_CASO, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,12 +44,12 @@ const EmailForm = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Error al enviar el correo');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al enviar el correo');
       }
 
       setSuccess('Correo enviado exitosamente');
       // Limpiar formulario
-      setDestinatarios([]);
       setAsunto('');
       setCuerpo('');
     } catch (err) {
@@ -91,46 +62,11 @@ const EmailForm = () => {
   return (
     <div className="email-form-container">
       <div className="email-form-header">
-        <h2>Mensaje nuevo</h2>
+        <h2>Enviar correo sobre el caso</h2>
+        <p>Este correo se enviará a todos los participantes del caso</p>
       </div>
       
       <form onSubmit={enviarCorreo} className="email-form">
-        <div className="form-group">
-          <label>Para:</label>
-          <div className="destinatarios-input">
-            <input
-              type="email"
-              value={nuevoDestinatario}
-              onChange={(e) => setNuevoDestinatario(e.target.value)}
-              placeholder="Ingrese email del destinatario"
-              disabled={isLoading}
-            />
-            <button
-              type="button"
-              onClick={agregarDestinatario}
-              className="add-button"
-              disabled={isLoading || !nuevoDestinatario.trim()}
-            >
-              Añadir
-            </button>
-          </div>
-          <div className="destinatarios-list">
-            {destinatarios.map((email, index) => (
-              <div key={index} className="email-tag">
-                {email}
-                <button
-                  type="button"
-                  onClick={() => eliminarDestinatario(index)}
-                  className="remove-button"
-                  disabled={isLoading}
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
         <div className="form-group">
           <label>Asunto:</label>
           <input
@@ -149,6 +85,7 @@ const EmailForm = () => {
             onChange={(e) => setCuerpo(e.target.value)}
             disabled={isLoading}
             rows={10}
+            required
           />
         </div>
 
@@ -157,7 +94,7 @@ const EmailForm = () => {
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || !asunto.trim() || !cuerpo.trim()}
           className="submit-button"
         >
           {isLoading ? (
@@ -166,7 +103,7 @@ const EmailForm = () => {
               Enviando...
             </div>
           ) : (
-            'Enviar'
+            'Enviar Correo'
           )}
         </button>
       </form>

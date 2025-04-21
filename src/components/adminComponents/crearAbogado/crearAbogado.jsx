@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './crearAbogado.css';
+import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../loading/LoadingSpinner';
 import { FaArrowRight, FaTimes } from 'react-icons/fa'; // Importar los íconos que estás usando
 
@@ -16,6 +17,7 @@ const CrearAbogado = () => {
     const [searchLoading, setSearchLoading] = useState({
         especializaciones: false
     });
+    const navigate = useNavigate();
 
     useEffect(() => {
         const savedData = JSON.parse(localStorage.getItem('formData')) || {};
@@ -69,6 +71,7 @@ const CrearAbogado = () => {
             console.log('Cuenta creada:', data);
             setError('');
             alert('Cuenta creada exitosamente');
+            navigate('/');
             localStorage.removeItem('formData');
         } catch (error) {
             console.error('Error:', error);

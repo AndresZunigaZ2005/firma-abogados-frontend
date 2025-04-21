@@ -115,3 +115,52 @@
 .documents-section {
   margin-top: 20px;
 }
+
+/* Estilos para el estado del caso */
+.case-status {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.case-status.ACTIVO {
+  background-color: #4CAF50; /* Verde */
+  color: white;
+}
+
+.case-status.INACTIVO {
+  background-color: #FF9800; /* Naranja */
+  color: white;
+}
+
+.case-status.CERRADO {
+  background-color: #F44336; /* Rojo */
+  color: white;
+}
+
+.participant-tag {
+  display: inline-block;
+  background-color: #f0f0f0;
+  padding: 5px 10px;
+  margin: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.participant-tag:hover {
+  background-color: #e0e0e0;
+}
+
+.no-participants {
+  color: #777;
+  font-style: italic;
+}
+
+.participants-list {
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+}

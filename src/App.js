@@ -20,6 +20,7 @@ import CasesViewAbogado from './components/abogadoComponents/CasesViewAbogado/Ca
 import UpdateCase from './components/abogadoComponents/updateCase/UpdateCase'
 
 import './App.css';
+import CrearAbogado from './components/adminComponents/crearAbogado/crearAbogado';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -158,7 +159,7 @@ function App() {
               element={
                 <UserProtectedRoute allowedTypes={['ADMIN']}>
                   {/* Aquí iría el componente para añadir abogados */}
-                  <div>Añadir abogado</div>
+                  <CrearAbogado />
                 </UserProtectedRoute>
               }
             />

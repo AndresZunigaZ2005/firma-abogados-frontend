@@ -6,23 +6,26 @@ import LoadingSpinner from "../../loading/LoadingSpinner";
 const CasesViewAbogado = () => {
   const [casos, setCasos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('TODOS');
   const navigate = useNavigate();
 
   const fetchCasos = async () => {
     setIsLoading(true);
+    setError('');
     try {
       const email = localStorage.getItem("userEmail");
       const jwt = localStorage.getItem("jwt");
 
       if (!email || !jwt) {
-        throw new Error("Faltan credenciales.");
+        throw new Error("Faltan credenciales. Por favor inicie sesión nuevamente.");
       }
 
       // Obtener abogado por email
       const abogadoResponse = await fetch(
         `${process.env.REACT_APP_BUSCAR_POR_EMAIL}/${encodeURIComponent(email)}`,
         {
-          method: "GET",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${jwt}`,
@@ -30,16 +33,17 @@ const CasesViewAbogado = () => {
         }
       );
 
-      if (!abogadoResponse.ok) throw new Error("Error al obtener el abogado.");
+      if (!abogadoResponse.ok) {
+        throw new Error("Error al obtener información del abogado.");
+      }
 
       const abogadoData = await abogadoResponse.json();
-      const id = abogadoData.respuesta.cedula;
+      const cedulaAbogado = abogadoData.respuesta.cedula;
 
       // Obtener casos del abogado
       const casosResponse = await fetch(
-        `${process.env.REACT_APP_LISTAR_CASOS_ABOGADO}/${id}`,
+        `${process.env.REACT_APP_LISTAR_CASOS_ABOGADO}/${cedulaAbogado}`,
         {
-          method: "GET",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${jwt}`,
@@ -47,13 +51,15 @@ const CasesViewAbogado = () => {
         }
       );
 
-      if (!casosResponse.ok) throw new Error("Error al obtener los casos.");
+      if (!casosResponse.ok) {
+        throw new Error("Error al obtener los casos asignados.");
+      }
 
       const casosData = await casosResponse.json();
-      setCasos(casosData.respuesta);
+      setCasos(casosData.respuesta || []);
     } catch (error) {
       console.error("Error:", error);
-      alert("No se pudieron cargar los casos. Por favor, recarga la página.");
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -64,9 +70,19 @@ const CasesViewAbogado = () => {
   }, []);
 
   const redirigirActualizar = (caso) => {
-    // Guardar el caso completo en localStorage
-    localStorage.setItem("casoSeleccionado", JSON.stringify(caso));
-    navigate("/abogado/updateCase");
+    try {
+      // Validar estructura básica del caso antes de guardar
+      if (!caso.codigo || !caso.nombreCaso) {
+        throw new Error('El caso no tiene la estructura esperada');
+      }
+      
+      // Guardar el caso completo en localStorage
+      localStorage.setItem("casoSeleccionado", JSON.stringify(caso));
+      navigate("/abogado/updateCase");
+    } catch (err) {
+      console.error('Error al redirigir:', err);
+      setError('Error al cargar el caso seleccionado');
+    }
   };
 
   return (

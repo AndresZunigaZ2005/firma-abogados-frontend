@@ -11,52 +11,55 @@ const ViewCaseInformation = () => {
   const [caso, setCaso] = useState(null);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [abogados, setAbogados] = useState([]);
-  const [clientes, setClientes] = useState([]);
+  const [clientesInfo, setClientesInfo] = useState([]);
+  const [abogadosInfo, setAbogadosInfo] = useState([]);
   const [loadingParticipants, setLoadingParticipants] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('informacion');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Función para cargar los participantes del caso
-  const fetchParticipants = async (casoData) => {
+  // Función para cargar la información de los participantes
+  const cargarInformacionParticipantes = async (clientesIds = [], abogadosIds = []) => {
+    setLoadingParticipants(true);
     try {
-      setLoadingParticipants(true);
-      
-      // Verificar y asegurar que abogados y clients sean arrays
-      const abogadosList = Array.isArray(casoData.abogados) ? casoData.abogados : [];
-      const clientsList = Array.isArray(casoData.clients) ? casoData.clients : [];
+      const jwt = localStorage.getItem('jwt');
+      if (!jwt) throw new Error('No hay token de autenticación');
 
-      // Obtener detalles de abogados
-      const abogadosPromises = abogadosList.map(async (cedula) => {
-        const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_CEDULA}/${cedula}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
-          }
-        });
-        if (!response.ok) throw new Error('Error al cargar abogado');
-        return await response.json();
-      });
-
-      // Obtener detalles de clientes
-      const clientesPromises = clientsList.map(async (cedula) => {
-        const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_CEDULA}/${cedula}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
-          }
-        });
-        if (!response.ok) throw new Error('Error al cargar cliente');
-        return await response.json();
-      });
-
-      const [abogadosData, clientesData] = await Promise.all([
-        Promise.all(abogadosPromises),
-        Promise.all(clientesPromises)
+      // Usar Promise.allSettled para manejar errores individuales
+      const [clientesData, abogadosData] = await Promise.all([
+        Promise.allSettled(
+          clientesIds.map(async (cedula) => {
+            const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_CEDULA}/${cedula}`, {
+              headers: { 'Authorization': `Bearer ${jwt}` }
+            });
+            if (!response.ok) throw new Error('Error al buscar cliente');
+            const data = await response.json();
+            return { cedula, nombre: data.respuesta?.nombre || 'Nombre no disponible' };
+          })
+        ),
+        Promise.allSettled(
+          abogadosIds.map(async (cedula) => {
+            const response = await fetch(`${process.env.REACT_APP_BUSCAR_POR_CEDULA}/${cedula}`, {
+              headers: { 'Authorization': `Bearer ${jwt}` }
+            });
+            if (!response.ok) throw new Error('Error al buscar abogado');
+            const data = await response.json();
+            return { cedula, nombre: data.respuesta?.nombre || 'Nombre no disponible' };
+          })
+        )
       ]);
 
-      setAbogados(abogadosData.map(a => a?.respuesta || { nombre: 'Desconocido', cedula: 'N/A' }));
-      setClientes(clientesData.map(c => c?.respuesta || { nombre: 'Desconocido', cedula: 'N/A' }));
+      // Filtrar resultados exitosos
+      setClientesInfo(clientesData
+        .filter(r => r.status === 'fulfilled')
+        .map(r => r.value)
+      );
       
+      setAbogadosInfo(abogadosData
+        .filter(r => r.status === 'fulfilled')
+        .map(r => r.value)
+      );
+
     } catch (err) {
       setError(err.message);
     } finally {
@@ -70,35 +73,7 @@ const ViewCaseInformation = () => {
     setShowModal(true);
   };
 
-  const handleAddComentario = async (comentario) => {
-    setIsLoading(true);
-    try {
-      // Aquí iría la lógica para guardar en el backend si es necesario
-      const response = await fetch(`${process.env.REACT_APP_AGREGAR_COMENTARIO}/${caso.codigo}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('jwt')}`
-        },
-        body: JSON.stringify(comentario)
-      });
-
-      if (!response.ok) throw new Error('Error al guardar comentario');
-
-      const data = await response.json();
-      
-      setCaso(prev => ({
-        ...prev,
-        comentarios: [...(prev.comentarios || []), data.comentario]
-      }));
-    } catch (err) {
-      setError(err.message);
-      throw err; // Para que el componente Comentarios pueda manejarlo
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Cargar datos del caso al montar el componente
   useEffect(() => {
     const loadCaseData = async () => {
       try {
@@ -126,7 +101,7 @@ const ViewCaseInformation = () => {
           };
           
           setCaso(casoData);
-          await fetchParticipants(casoData);
+          await cargarInformacionParticipantes(casoData.clients, casoData.abogados);
         } else {
           throw new Error('No se encontró información del caso');
         }
@@ -191,27 +166,30 @@ const ViewCaseInformation = () => {
           <>
             <div className="case-header">
               <h1>{caso.nombreCaso}</h1>
+              <div className={`case-status ${caso.estadoCaso}`}>
+                Estado: {caso.estadoCaso}
+              </div>
             </div>
             
             <div className="case-description">
               <h2>Descripción</h2>
               <p>{caso.descripcionCaso || 'No hay descripción disponible'}</p>
             </div>
-            
+              
             <div className="participants-section">
               <h2>Participantes</h2>
+              
               <h3>Abogados:</h3>
               <div className="participants-list">
-                {abogados.length > 0 ? (
-                  abogados.map((abogado, index) => (
-                    <span 
+                {abogadosInfo.length > 0 ? (
+                  abogadosInfo.map((abogado, index) => (
+                    <div 
                       key={`abogado-${index}`} 
-                      className="participant-name"
+                      className="participant-tag"
                       onClick={() => handleParticipantClick(abogado)}
                     >
-                      <strong>Abogado/a {abogado.nombre}</strong>
-                      {index < abogados.length - 1 ? ', ' : ''}
-                    </span>
+                      {abogado.nombre} ({abogado.cedula})
+                    </div>
                   ))
                 ) : (
                   <span className="no-participants">No hay abogados asignados</span>
@@ -220,16 +198,15 @@ const ViewCaseInformation = () => {
               
               <h3>Clientes:</h3>
               <div className="participants-list">
-                {clientes.length > 0 ? (
-                  clientes.map((cliente, index) => (
-                    <span 
+                {clientesInfo.length > 0 ? (
+                  clientesInfo.map((cliente, index) => (
+                    <div 
                       key={`cliente-${index}`} 
-                      className="participant-name"
+                      className="participant-tag"
                       onClick={() => handleParticipantClick(cliente)}
                     >
-                      <strong>{cliente.nombre}</strong>
-                      {index < clientes.length - 1 ? ', ' : ''}
-                    </span>
+                      {cliente.nombre} ({cliente.cedula})
+                    </div>
                   ))
                 ) : (
                   <span className="no-participants">No hay clientes asignados</span>
@@ -238,13 +215,8 @@ const ViewCaseInformation = () => {
             </div>
           </>
         )}
-
         {activeTab === 'comentarios' && (
-          <Comentarios 
-            comentarios={caso.comentarios} 
-            onAddComentario={handleAddComentario}
-            isLoading={isLoading}
-          />
+          <Comentarios caso={caso} />
         )}
 
         {activeTab === 'documentos' && (
