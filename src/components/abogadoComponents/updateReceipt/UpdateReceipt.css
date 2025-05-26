@@ -1,0 +1,119 @@
+.container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border-radius: 1rem;
+  background-color: #f8f9fa;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.container h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+}
+
+.static-field {
+  background-color: #e9ecef;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.button {
+  background-color: #007bff;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.button:hover {
+  background-color: #0056b3;
+}
+
+.abonos-list {
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+/* Popup Content */
+.popup-content {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  position: relative; /* Needed for positioning the close button if you add one */
+}
+
+.popup-content p {
+  margin-bottom: 20px;
+  font-size: 1.1em;
+  color: #333;
+}
+
+.popup-content button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.popup-content button:hover {
+  background-color: #0056b3;
+}
+
+/* Specific styles for error and success popups */
+.error-popup {
+  border: 2px solid #dc3545; /* Red border for errors */
+  color: #dc3545; /* Red text for errors */
+}
+
+.error-popup button {
+  background-color: #dc3545;
+}
+
+.error-popup button:hover {
+  background-color: #c82333;
+}
+
+.success-popup {
+  border: 2px solid #28a745; /* Green border for success */
+  color: #28a745; /* Green text for success */
+}
+
+.success-popup button {
+  background-color: #28a745;
+}
+
+.success-popup button:hover {
+  background-color: #218838;
+}

@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ParticipantModal from '../../participantModals/ParticipantModal';
 import DocumentsList from '../../documentList/DocumentsList';
-import LoadingSpinner from '../../loading/LoadingSpinner';
 import Comentarios from '../../comentarios/Comentarios';
+import LoadingSpinner from '../../loading/LoadingSpinner';
+import { FaFileInvoiceDollar } from 'react-icons/fa';
 import './ViewCaseInformation.css';
 
-const ViewCaseInformation = () => {
+const ViewCaseInformation = ({ initialCaso }) => {
   const { state } = useLocation();
+  const navigate = useNavigate();
+
   const [caso, setCaso] = useState(null);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -18,14 +21,16 @@ const ViewCaseInformation = () => {
   const [activeTab, setActiveTab] = useState('informacion');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Función para cargar la información de los participantes
+  const [hasFactura, setHasFactura] = useState(false);
+  const [factura, setFactura] = useState(null);
+  const [checkingFactura, setCheckingFactura] = useState(true);
+
   const cargarInformacionParticipantes = async (clientesIds = [], abogadosIds = []) => {
     setLoadingParticipants(true);
     try {
       const jwt = localStorage.getItem('jwt');
       if (!jwt) throw new Error('No hay token de autenticación');
 
-      // Usar Promise.allSettled para manejar errores individuales
       const [clientesData, abogadosData] = await Promise.all([
         Promise.allSettled(
           clientesIds.map(async (cedula) => {
@@ -49,12 +54,11 @@ const ViewCaseInformation = () => {
         )
       ]);
 
-      // Filtrar resultados exitosos
       setClientesInfo(clientesData
         .filter(r => r.status === 'fulfilled')
         .map(r => r.value)
       );
-      
+
       setAbogadosInfo(abogadosData
         .filter(r => r.status === 'fulfilled')
         .map(r => r.value)
@@ -67,96 +71,149 @@ const ViewCaseInformation = () => {
     }
   };
 
-  // Función para manejar el clic en un participante
+  const checkFactura = async (idCaso) => {
+    setCheckingFactura(true);
+    setHasFactura(false); // Reset before check
+    setFactura(null); // Reset before check
+
+    try {
+      const jwt = localStorage.getItem('jwt');
+      if (!jwt) throw new Error('No hay token de autenticación.');
+
+      const response = await fetch(`${process.env.REACT_APP_GET_FACTURA_POR_CASO}/${idCaso}`, {
+        headers: { 'Authorization': `Bearer ${jwt}` }
+      });
+
+      if (response.ok) {
+        const respuesta = await response.json();
+        const factura = respuesta.respuesta;
+        // Check if the response is a non-empty object
+        if (factura && typeof factura === 'object' && Object.keys(factura).length > 0) {
+          setFactura(factura);
+          setHasFactura(true);
+        } else {
+          // If response is OK but empty/null, explicitly set no factura
+          setHasFactura(false);
+        }
+      } else if (response.status === 404) {
+        // Specifically handle 404 as "no factura found"
+        setHasFactura(false);
+      } else {
+        // For other error statuses, attempt to read error message
+        const errorData = await response.json().catch(() => ({}));
+        console.error('API Error checking factura:', errorData.message || response.statusText);
+        setHasFactura(false); // Do not show button on other API errors
+      }
+    } catch (err) {
+      console.error('Fetch Error checking factura:', err);
+      setHasFactura(false);
+    } finally {
+      setCheckingFactura(false);
+    }
+  };
+
   const handleParticipantClick = (participant) => {
     setSelectedParticipant(participant);
     setShowModal(true);
   };
 
-  // Cargar datos del caso al montar el componente
+  const handleViewFacturaClick = () => {
+    if (factura) {
+      console.log(factura);
+      navigate('/viewReceiptCase', { state: { factura: factura } });
+    }
+  };
+
+  // Effect to load case data, prioritizing initialCaso prop
   useEffect(() => {
     const loadCaseData = async () => {
+      setIsLoading(true);
       try {
-        setLoadingParticipants(true);
-        
-        // Priorizar el estado de navegación
-        let casoData = state?.caso;
-        
-        // Si no viene por estado, intentar con localStorage
-        if (!casoData) {
-          const casoGuardado = localStorage.getItem('casoSeleccionado');
-          if (casoGuardado) {
-            casoData = JSON.parse(casoGuardado);
-          }
+        let casoData = initialCaso; // Prioritize initialCaso prop
+
+        // Fallback to navigation state if initialCaso is not provided
+        if (!casoData && state?.caso) {
+          casoData = state.caso;
         }
-  
+
+        // Removed localStorage fallback here as requested
+
         if (casoData) {
-          // Asegurar que los arrays existan
+          // Ensure arrays exist and handle potential 'clients' vs 'clientes' property
           casoData = {
             ...casoData,
             abogados: Array.isArray(casoData.abogados) ? casoData.abogados : [],
-            clients: Array.isArray(casoData.clients) ? casoData.clients : [],
+            // Use 'clientes' if it exists, otherwise try 'clients'. Default to empty array.
+            clientes: Array.isArray(casoData.clientes)
+              ? casoData.clientes
+              : (Array.isArray(casoData.clients) ? casoData.clients : []),
             documentos: Array.isArray(casoData.documentos) ? casoData.documentos : [],
             comentarios: Array.isArray(casoData.comentarios) ? casoData.comentarios : []
           };
-          
+
           setCaso(casoData);
-          await cargarInformacionParticipantes(casoData.clients, casoData.abogados);
+          // Pass the corrected 'clientes' property to cargarInformacionParticipantes
+          await cargarInformacionParticipantes(casoData.clientes, casoData.abogados);
+          await checkFactura(casoData.codigo);
         } else {
-          throw new Error('No se encontró información del caso');
+          throw new Error('No se encontró información del caso. Por favor, intente de nuevo.');
         }
       } catch (err) {
         setError(err.message);
       } finally {
-        setLoadingParticipants(false);
+        setIsLoading(false);
       }
     };
-  
+
     loadCaseData();
-  
-    return () => {
-      // Limpiar solo si no estamos navegando hacia atrás
-      if (!state?.from) {
-        localStorage.removeItem('casoSeleccionado');
-      }
-    };
-  }, [state]);
 
-  if (!caso) {
-    return <div className="error-message">No se encontró información del caso</div>;
-  }
+    // No localStorage cleanup needed here as it's no longer used as a primary source.
+  }, [initialCaso, state]); // Add initialCaso to dependencies
 
-  if (loadingParticipants) {
-    return <LoadingSpinner />;
+  // Combined loading state
+  if (isLoading || loadingParticipants || checkingFactura) {
+    return <LoadingSpinner fullPage />;
   }
 
   if (error) {
     return <div className="error-message">{error}</div>;
   }
 
+  // If caso is still null after loading attempts and no error
+  if (!caso) {
+    return <p>Cargando información del caso o el caso no fue encontrado.</p>;
+  }
+
   return (
     <div className="view-case-container">
-      {isLoading && <LoadingSpinner />}
-
       <div className="case-tabs">
-        <button 
+        <button
           className={`tab-button ${activeTab === 'informacion' ? 'active' : ''}`}
           onClick={() => setActiveTab('informacion')}
         >
           Información del Caso
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'comentarios' ? 'active' : ''}`}
           onClick={() => setActiveTab('comentarios')}
         >
           Comentarios ({caso.comentarios?.length || 0})
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'documentos' ? 'active' : ''}`}
           onClick={() => setActiveTab('documentos')}
         >
           Documentos ({caso.documentos?.length || 0})
         </button>
+        {/* Only show the button if hasFactura is true and checkingFactura is false */}
+        {hasFactura && !checkingFactura && (
+          <button
+            className="tab-button"
+            onClick={handleViewFacturaClick}
+          >
+            <FaFileInvoiceDollar /> Ver Factura
+          </button>
+        )}
       </div>
 
       {error && <div className="error-message">{error}</div>}
@@ -170,21 +227,21 @@ const ViewCaseInformation = () => {
                 Estado: {caso.estadoCaso}
               </div>
             </div>
-            
+
             <div className="case-description">
               <h2>Descripción</h2>
               <p>{caso.descripcionCaso || 'No hay descripción disponible'}</p>
             </div>
-              
+
             <div className="participants-section">
               <h2>Participantes</h2>
-              
+
               <h3>Abogados:</h3>
               <div className="participants-list">
                 {abogadosInfo.length > 0 ? (
                   abogadosInfo.map((abogado, index) => (
-                    <div 
-                      key={`abogado-${index}`} 
+                    <div
+                      key={`abogado-${index}`}
                       className="participant-tag"
                       onClick={() => handleParticipantClick(abogado)}
                     >
@@ -195,13 +252,13 @@ const ViewCaseInformation = () => {
                   <span className="no-participants">No hay abogados asignados</span>
                 )}
               </div>
-              
+
               <h3>Clientes:</h3>
               <div className="participants-list">
                 {clientesInfo.length > 0 ? (
                   clientesInfo.map((cliente, index) => (
-                    <div 
-                      key={`cliente-${index}`} 
+                    <div
+                      key={`cliente-${index}`}
                       className="participant-tag"
                       onClick={() => handleParticipantClick(cliente)}
                     >
@@ -216,7 +273,7 @@ const ViewCaseInformation = () => {
           </>
         )}
         {activeTab === 'comentarios' && (
-          <Comentarios caso={caso} />
+          <Comentarios initialCaso={caso} />
         )}
 
         {activeTab === 'documentos' && (

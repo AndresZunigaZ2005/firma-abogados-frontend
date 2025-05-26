@@ -59,14 +59,7 @@ const CasesView = () => {
 
   const handleVerMas = (caso) => {
     // Usamos ambas opciones por redundancia
-    navigate('/viewCaseInformation', { 
-      state: { 
-        caso,
-        from: 'casesView' // Podemos añadir metadata adicional si es necesario
-      }
-     
-    });
-    localStorage.setItem('casoSeleccionado', JSON.stringify(caso));
+    navigate('/viewCaseInformation', { state: { caso }});
   };
 
   useEffect(() => {

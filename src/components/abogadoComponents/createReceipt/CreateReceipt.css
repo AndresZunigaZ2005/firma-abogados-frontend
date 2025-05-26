@@ -1,0 +1,197 @@
+/* CreateReceipt.css */
+
+.factura-container {
+  max-width: 500px;
+  margin: 2rem auto;
+  background-color: #f8fafc;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative; /* Needed for positioning popups if they're inside this container */
+}
+
+.factura-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #1f2937;
+}
+
+.factura-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.factura-label {
+  display: block; /* Ensure label takes full width */
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: #374151;
+}
+
+.factura-input,
+.factura-textarea {
+  width: 100%; /* Make inputs take full width */
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  background-color: white;
+  transition: border-color 0.2s;
+  box-sizing: border-box; /* Include padding in element's total width and height */
+}
+
+.factura-input:focus,
+.factura-textarea:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25); /* Subtle focus ring */
+}
+
+.factura-textarea {
+  min-height: 100px; /* Give it a reasonable default height */
+  resize: vertical; /* Allow vertical resizing */
+}
+
+.factura-button {
+  background-color: #3b82f6;
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+  width: 100%; /* Make button take full width */
+  margin-top: 1rem; /* Space above button */
+}
+
+.factura-button:hover {
+  background-color: #2563eb;
+}
+
+.factura-button:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.factura-error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem; /* Space above error message */
+}
+
+/* General messages (can be success or info) */
+.factura-mensaje {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+}
+
+/* Specific success message styling */
+.factura-success {
+  background-color: #d1fae5; /* Light green */
+  color: #065f46; /* Darker green */
+  border: 1px solid #34d399;
+}
+
+/* Specific error message styling for in-page messages */
+.factura-error-inline { /* Renamed to avoid conflict with field errors */
+  background-color: #fee2e2; /* Light red */
+  color: #991b1b; /* Darker red */
+  border: 1px solid #f87171;
+}
+
+.factura-info {
+  text-align: center;
+  padding: 1rem;
+  background-color: #e0f2fe; /* Light blue */
+  color: #0369a1; /* Darker blue */
+  border-radius: 0.5rem;
+  border: 1px solid #7dd3fc;
+}
+
+
+/* --- Popup Styles --- */
+
+/* Overlay that covers the whole screen */
+.popup-overlay {
+  position: fixed; /* Fixed to the viewport */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* High z-index to be on top of other content */
+  backdrop-filter: blur(3px); /* Optional: adds a slight blur to content behind */
+}
+
+/* The actual popup box */
+.popup-content {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 450px;
+  width: 90%; /* Responsive width */
+  animation: fadeIn 0.3s ease-out; /* Simple fade-in animation */
+  transform: scale(1); /* Initial scale for pop-in effect */
+  transition: transform 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.popup-content p {
+  margin-bottom: 1.5rem;
+  font-size: 1.15rem;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Buttons inside popups */
+.popup-button-success,
+.popup-button-error {
+  /* Inherit basic factura-button styles */
+  width: auto; /* Override 100% width for inline buttons */
+  margin-top: 0; /* Remove top margin */
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+}
+
+/* Specific styles for error popup */
+.error-popup {
+  border: 2px solid #ef4444; /* Red border for errors */
+}
+
+.error-popup .popup-button-error {
+  background-color: #ef4444; /* Red button */
+}
+
+.error-popup .popup-button-error:hover {
+  background-color: #dc2626; /* Darker red on hover */
+}
+
+/* Specific styles for success popup */
+.success-popup {
+  border: 2px solid #22c55e; /* Green border for success */
+}
+
+.success-popup .popup-button-success {
+  background-color: #22c55e; /* Green button */
+}
+
+.success-popup .popup-button-success:hover {
+  background-color: #16a34a; /* Darker green on hover */
+}

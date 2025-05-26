@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import './crearAbogado.css';
 import { useNavigate } from 'react-router-dom';
+import { useEmailValidator } from '../../../hook/useEmailValidator';
 import LoadingSpinner from '../../loading/LoadingSpinner';
 import { FaArrowRight, FaTimes } from 'react-icons/fa'; // Importar los íconos que estás usando
 
 const CrearAbogado = () => {
     const [cedula, setCedula] = useState('');
+    const [cedulaError, setCedulaError] = useState('');
     const [nombre, setNombre] = useState('');
     const [telefono, setTelefono] = useState('');
+    const [telefonoError, setTelefonoError] = useState('');
     const [email, setEmail] = useState('');
+    const emailValido = useEmailValidator(email);
     const [direccion, setDireccion] = useState('');
     const [especializaciones, setEspecializaciones] = useState([]);
     const [especializacion, setEspecializacion] = useState('');
@@ -19,6 +23,30 @@ const CrearAbogado = () => {
     });
     const navigate = useNavigate();
 
+    const [opcionesEspecializacion] = useState(['CIVIL', 'PENAL', 'FAMILIA']); // Opciones predefinidas
+
+    const handleTelefonoChange = (e) => {
+        const value = e.target.value;
+        // Solo permite números y actualiza el estado si es válido
+        if (/^\d*$/.test(value)) {
+          setTelefono(value);
+          setTelefonoError(''); // Limpiar error si había uno
+        } else {
+          setTelefonoError('El teléfono solo puede contener números');
+        }
+      };
+
+    const handleCedulaChange = (e) => {
+        const value = e.target.value;
+        // Solo permite números y actualiza el estado si es válido
+        if (/^\d*$/.test(value)) {
+          setCedulaError(value);
+          setCedulaError(''); // Limpiar error si había uno
+        } else {
+            setCedulaError('El teléfono solo puede contener números');
+        }
+    };
+    
     useEffect(() => {
         const savedData = JSON.parse(localStorage.getItem('formData')) || {};
         setCedula(savedData.cedula || '');
@@ -44,7 +72,22 @@ const CrearAbogado = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        setTelefonoError('');
+        setError('');
         
+        // Validación del teléfono
+        if (!/^\d+$/.test(telefono)) {
+            setTelefonoError('El teléfono solo puede contener números');
+            setIsLoading(false);
+            return;
+        }
+
+        if(telefono < 10 || telefono > 10){
+            setTelefonoError('El teléfono debe de ser de 10 númeor');
+            setIsLoading(false);
+            return;
+        }
+
         const datosCuenta = {
             cedula,
             especializaciones,
@@ -83,7 +126,7 @@ const CrearAbogado = () => {
 
     const agregarEspecializacion = () => {
         setError('');
-        if (especializacion.trim()) {
+        if (especializacion && !especializaciones.includes(especializacion)) {
             setEspecializaciones([...especializaciones, especializacion]);
             setEspecializacion('');
         }
@@ -110,9 +153,11 @@ const CrearAbogado = () => {
                         name="cedula"
                         placeholder="Cédula"
                         value={cedula}
-                        onChange={(e) => setCedula(e.target.value)}
+                        onChange={handleCedulaChange}
                         disabled={isLoading}
                         required
+                        inputMode="numeric"  // Muestra teclado numérico en móviles
+                        pattern="\d*" // Patrón HTML5 para solo números
                     />
                 </div>
 
@@ -138,9 +183,11 @@ const CrearAbogado = () => {
                         name="telefono"
                         placeholder="Teléfono"
                         value={telefono}
-                        onChange={(e) => setTelefono(e.target.value)}
+                        onChange={handleTelefonoChange}
                         disabled={isLoading}
                         required
+                        inputMode="numeric"  // Muestra teclado numérico en móviles
+                        pattern="\d*" // Patrón HTML5 para solo números
                     />
                 </div>
 
@@ -156,6 +203,7 @@ const CrearAbogado = () => {
                         disabled={isLoading}
                         required
                     />
+                    {!emailValido && email.length > 0 && <span>Correo no válido</span>}
                 </div>
 
                 <div className="form-group">
@@ -176,18 +224,24 @@ const CrearAbogado = () => {
                     <label>Especializaciones:</label>
                     <div className="add-items-container">
                         <div className="add-item-input">
-                            <input
-                                type="text"
+                            <select
                                 value={especializacion}
                                 onChange={(e) => setEspecializacion(e.target.value)}
                                 disabled={isLoading || searchLoading.especializaciones}
-                                placeholder="Ingrese las especializaciones del abogado"
-                            />
+                                className="combo-box"
+                            >
+                                <option value="">Seleccione una especialización</option>
+                                {opcionesEspecializacion.map((opcion) => (
+                                    <option key={opcion} value={opcion}>
+                                        {opcion}
+                                    </option>
+                                ))}
+                            </select>
                             <button
                                 type="button"
                                 onClick={agregarEspecializacion}
                                 className="add-button"
-                                disabled={isLoading || searchLoading.especializaciones || !especializacion.trim()}
+                                disabled={isLoading || searchLoading.especializaciones || !especializacion}
                             >
                                 {searchLoading.especializaciones ? (
                                     <LoadingSpinner small white />

@@ -7,8 +7,8 @@ const CasesViewAbogado = () => {
   const [casos, setCasos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('TODOS');
+  const [searchTerm, setSearchTerm] = useState(''); // Not used in provided snippet, but kept
+  const [filterStatus, setFilterStatus] = useState('TODOS'); // Not used in provided snippet, but kept
   const navigate = useNavigate();
 
   const fetchCasos = async () => {
@@ -69,21 +69,25 @@ const CasesViewAbogado = () => {
     fetchCasos();
   }, []);
 
+  // --- Change made here ---
   const redirigirActualizar = (caso) => {
     try {
-      // Validar estructura básica del caso antes de guardar
+      // Validate basic case structure before navigating
       if (!caso.codigo || !caso.nombreCaso) {
         throw new Error('El caso no tiene la estructura esperada');
       }
       
-      // Guardar el caso completo en localStorage
-      localStorage.setItem("casoSeleccionado", JSON.stringify(caso));
-      navigate("/abogado/updateCase");
+      // Pass the complete 'caso' object via navigation state
+      navigate("/abogado/updateCase", { state: { caso } });
+      
+      // Remove localStorage usage as it's no longer needed for this navigation
+      // localStorage.removeItem("casoSeleccionado"); 
     } catch (err) {
       console.error('Error al redirigir:', err);
       setError('Error al cargar el caso seleccionado');
     }
   };
+  // --- End of change ---
 
   return (
     <div className={`cases-container ${isLoading ? "loading-disabled" : ""}`}>

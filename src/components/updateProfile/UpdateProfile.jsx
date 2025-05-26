@@ -7,10 +7,13 @@ const UpdateProfileClient = () => {
   const [nombre, setNombre] = useState('');
   const [cedula, setCedula] = useState('');
   const [telefono, setTelefono] = useState('');
+  const [telefonoError, setTelefonoError] = useState('');
   const [direccion, setDireccion] = useState('');
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Estado para controlar el loading
+
+  const [error, setError] = useState('');
   const navigate = useNavigate(); // Hook para navegación
 
   const fetchUserData = async () => {
@@ -45,6 +48,17 @@ const UpdateProfileClient = () => {
     }
   };
 
+  const handleTelefonoChange = (e) => {
+    const value = e.target.value;
+    // Solo permite números y actualiza el estado si es válido
+    if (/^\d*$/.test(value)) {
+      setTelefono(value);
+      setTelefonoError(''); // Limpiar error si había uno
+    } else {
+      setTelefonoError('El teléfono solo puede contener números');
+    }
+  };
+
   useEffect(() => {
     fetchUserData();
   }, []);
@@ -52,7 +66,15 @@ const UpdateProfileClient = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     setIsLoading(true); // Activar loading al iniciar actualización
+    setTelefonoError('');
+    setError('');
     
+        // Validación del teléfono
+    if (!/^\d+$/.test(telefono)) {
+      setError('El teléfono solo puede contener números');
+      setIsLoading(false);
+      return;
+    }
     const datosActualizacion = {
       cedula,
       nombre,
@@ -62,6 +84,8 @@ const UpdateProfileClient = () => {
       password,
       rol: 'CLIENTE'
     };
+
+    setError(''); // Limpiar errores anteriores
 
     try {
       const response = await fetch(process.env.REACT_APP_ACTUALIZAR_CUENTA, {
@@ -114,6 +138,7 @@ const UpdateProfileClient = () => {
             id="cedula" 
             value={cedula} 
             disabled
+            required
           />
         </div>
         
@@ -123,8 +148,11 @@ const UpdateProfileClient = () => {
             type="text" 
             id="telefono" 
             value={telefono} 
-            onChange={(e) => setTelefono(e.target.value)} 
+            onChange={handleTelefonoChange} 
             disabled={isLoading}
+            required
+            inputMode="numeric"  // Muestra teclado numérico en móviles
+            pattern="\d*" // Patrón HTML5 para solo números
           />
         </div>
         

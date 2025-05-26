@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import './SignupClientForm.css';
 import LoadingSpinner from '../../loading/LoadingSpinner';
+import { useEmailValidator } from '../../../hook/useEmailValidator';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 
 const SignupClientForm = () => {
   const [cedula, setCedula] = useState('');
+  const [cedulaError, setCedulaError] = useState('');
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
+  const [telefonoError, setTelefonoError] = useState(''); // Nuevo estado para error de teléfono
   const [email, setEmail] = useState('');
+  const emailValido = useEmailValidator(email);
   const [direccion, setdireccion] = useState(''); // Cambiado de direccion a direccion
   const [password, setPassword] = useState('');
   const [confirmarContrasenia, setConfirmarContrasenia] = useState(''); // Cambiado de repeatPassword
@@ -48,12 +52,14 @@ const SignupClientForm = () => {
 
   // Validar la contraseña
   const validatePassword = (value) => {
-    if (value.length < 5) {
-      setPasswordError('La contraseña debe tener al menos 5 caracteres.');
+    if (value.length < 7) {
+      setPasswordError('La contraseña debe tener al menos 7 caracteres.');
     } else if (!/[a-z]/.test(value)) {
       setPasswordError('La contraseña debe contener al menos una letra minúscula.');
     } else if (!/[A-Z]/.test(value)) {
       setPasswordError('La contraseña debe contener al menos una letra mayúscula.');
+    } else if (!/[0-9]/.test(value)) {
+      setPasswordError('Debe contener al menos un número');
     } else {
       setPasswordError('');
     }
@@ -93,18 +99,54 @@ const SignupClientForm = () => {
     setShowConfirmarContrasenia(!showConfirmarContrasenia);
   };
 
+  const handleTelefonoChange = (e) => {
+    const value = e.target.value;
+    // Solo permite números y actualiza el estado si es válido
+    if (/^\d*$/.test(value)) {
+      setTelefono(value);
+      setTelefonoError(''); // Limpiar error si había uno
+    } else {
+      setTelefonoError('El teléfono solo puede contener números');
+    }
+  };
+
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-    
-    if (passwordError || confirmarContraseniaError) {
-      setError('Por favor, corrige los errores en las contraseñas.');
+    setCedulaError('');
+    setTelefonoError('');
+
+    // Validación de cédula
+    if (cedula.length < 4) {
+      setCedulaError('La cédula debe tener al menos 4 dígitos');
+      setIsLoading(false);
+      return;
+    }
+
+        // Validación de teléfono
+    if (!/^\d+$/.test(telefono)) {
+      setTelefonoError('El teléfono solo puede contener números');
+      setIsLoading(false);
       return;
     }
   
-    // Crear el objeto con los datos del formulario, usando los nombres del DTO
+    // Validación de contraseña
+    if (passwordError || confirmarContraseniaError) {
+      setError('Por favor, corrige los errores en las contraseñas.');
+      setIsLoading(false);
+      return;
+    }
+  
+    // Validar que las contraseñas coincidan (doble verificación)
+    if (password !== confirmarContrasenia) {
+      setConfirmarContraseniaError('Las contraseñas no coinciden.');
+      setIsLoading(false);
+      return;
+    }
+  
+    // Crear el objeto con los datos del formulario
     const datosCuenta = {
       cedula,
       nombre,
@@ -112,8 +154,8 @@ const SignupClientForm = () => {
       email,
       direccion,
       password,
-      confirmarContrasenia, // Cambiado para coincidir con el DTO
-      rol: 'CLIENTE', // Cambiado de rol a rol para coincidir con el DTO
+      confirmarContrasenia,
+      rol: 'CLIENTE',
     };
   
     try {
@@ -126,18 +168,29 @@ const SignupClientForm = () => {
       });
   
       if (!response.ok) {
-        throw new Error('Error al crear la cuenta');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al crear la cuenta');
       }
   
       const data = await response.json();
       console.log('Cuenta creada:', data);
+      
+      // Limpiar estados y redirigir
       setError('');
+      setCedulaError('');
       alert('Cuenta creada exitosamente');
       navigate('/');
       localStorage.removeItem('formData');
+      
     } catch (error) {
       console.error('Error:', error);
-      setError('Hubo un error al crear la cuenta. Inténtalo de nuevo.');
+      setError(error.message || 'Hubo un error al crear la cuenta. Inténtalo de nuevo.');
+      
+      // Manejo específico para errores de cédula duplicada
+      if (error.message.includes('cédula') || error.message.includes('Cédula')) {
+        setCedulaError(error.message);
+      }
+      
     } finally {
       setIsLoading(false);
     }
@@ -182,14 +235,16 @@ const SignupClientForm = () => {
         <div className="form-group">
           <label htmlFor="telefono">Teléfono</label>
           <input
-            type="tel"
+            type="text"
             id="telefono"
             name="telefono"
             placeholder="Teléfono"
             value={telefono}
-            onChange={(e) => setTelefono(e.target.value)}
+            onChange={handleTelefonoChange}
             disabled={isLoading}
             required
+            inputMode="numeric" // Muestra teclado numérico en móviles
+            pattern="\d*" // Patrón HTML5 para solo números
           />
         </div>
 
@@ -205,6 +260,7 @@ const SignupClientForm = () => {
             disabled={isLoading}
             required
           />
+          {!emailValido && email.length > 0 && <span>Correo no válido</span>}
         </div>
 
         <div className="form-group">

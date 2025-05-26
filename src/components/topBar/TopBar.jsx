@@ -64,9 +64,6 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
             <button onClick={() => handleNavigation('/viewCases')}>
               Ver casos
             </button>
-            <button onClick={() => handleNavigation('/realizar-pago')}>
-              Realizar pago
-            </button>
           </>
         );
       case 'ABOGADO':

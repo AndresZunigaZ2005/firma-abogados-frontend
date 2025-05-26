@@ -1,0 +1,295 @@
+/* ReceiptClientView.css */
+.factura-details-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 20px auto;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  color: #333;
+  position: relative; /* Crucial for positioning the overlay if it's not full-page, though fixed is better for popups */
+}
+
+.factura-details-header {
+  text-align: center;
+  margin-bottom: 25px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.factura-details-header h1 {
+  color: #0056b3;
+  font-size: 2em;
+  margin-bottom: 5px;
+}
+
+.factura-card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.factura-card p {
+  margin-bottom: 10px;
+  font-size: 1.1em;
+  line-height: 1.6;
+}
+
+.factura-card p strong {
+  color: #555;
+}
+
+/* Replaces the direct <p> styling for static fields to ensure consistency */
+.form-group {
+  margin-bottom: 1rem; /* Adjusted for consistency with other forms */
+}
+
+.label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+  color: #555;
+}
+
+/* Style for non-editable display fields */
+.static-field {
+  background-color: #e9ecef;
+  padding: 0.75rem; /* Increased padding slightly */
+  border-radius: 0.5rem; /* Rounded corners */
+  font-size: 1rem;
+  color: #333;
+  border: 1px solid #dee2e6; /* A subtle border */
+  word-wrap: break-word; /* Ensures long text wraps */
+  white-space: pre-wrap; /* Preserves line breaks from data */
+}
+
+/* Status Badges/Indicators */
+.status-pagada {
+  color: white; /* Text color for badge */
+  background-color: #28a745; /* Green */
+  padding: 0.3em 0.8em; /* Padding for badge */
+  border-radius: 0.5rem; /* Rounded badge */
+  font-weight: bold;
+  display: inline-block; /* Allows padding and background */
+  text-transform: uppercase;
+  font-size: 0.9em;
+}
+
+.status-pendiente {
+  color: #343a40; /* Darker text for better contrast on yellow */
+  background-color: #ffc107; /* Yellow */
+  padding: 0.3em 0.8em;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  display: inline-block;
+  text-transform: uppercase;
+  font-size: 0.9em;
+}
+
+.status-desconocido {
+  color: white;
+  background-color: #6c757d; /* Gray */
+  padding: 0.3em 0.8em;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  display: inline-block;
+  text-transform: uppercase;
+  font-size: 0.9em;
+}
+
+.saldo-pendiente-display { /* Changed from .saldo-pendiente for clarity with the component */
+  font-weight: bold;
+  color: #d9534f; /* Red for emphasis */
+  font-size: 1.2em; /* Slightly larger for emphasis */
+}
+
+.abonos-section {
+  margin-top: 20px;
+  border-top: 1px dashed #eee;
+  padding-top: 15px;
+}
+
+.abonos-section h3 {
+  color: #0056b3;
+  margin-bottom: 10px;
+}
+
+.abonos-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.abonos-section li {
+  background-color: #eaf6ff;
+  border: 1px solid #d4edda;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95em;
+  color: #333;
+}
+
+.info-message { /* For "No hay abonos registrados" */
+  font-style: italic;
+  color: #6c757d;
+  background-color: #f0f2f5;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e6ea;
+}
+
+.add-abono-section {
+  margin-top: 25px;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.add-abono-section h3 {
+  color: #0056b3;
+  margin-bottom: 5px;
+}
+
+/* Reusing your .input style for the abono input */
+.add-abono-section .input { /* Changed from input[type="text"] for consistency */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.add-abono-section .button { /* Reusing your .button style */
+  background-color: #28a745; /* Green for add */
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.1em;
+  transition: background-color 0.3s ease;
+  width: fit-content;
+  align-self: flex-end; /* Align button to the right */
+}
+
+.add-abono-section .button:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.add-abono-section .button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Removed .alert, .error-message, .success-message as they are now popups */
+
+/* --- Pop-up Styles (Added/Adjusted) --- */
+
+.popup-overlay {
+  position: fixed; /* Ensures it covers the whole viewport */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent dark background */
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  z-index: 1000; /* Ensures it's on top of all other content */
+  opacity: 0; /* Start hidden for animation */
+  visibility: hidden; /* Start hidden for animation */
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.popup-overlay.show { /* Class to show the popup */
+  opacity: 1;
+  visibility: visible;
+}
+
+.popup-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25); /* Stronger shadow for pop-up */
+  text-align: center;
+  max-width: 450px; /* Slightly wider max-width */
+  width: 90%; /* Responsive width */
+  transform: scale(0.9); /* Start smaller for animation */
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+}
+
+.popup-overlay.show .popup-content {
+  transform: scale(1); /* Scale up on show */
+  opacity: 1;
+}
+
+.popup-content p {
+  margin-bottom: 25px; /* More space below message */
+  font-size: 1.15em; /* Slightly larger text */
+  color: #333;
+  word-wrap: break-word; /* Ensure messages wrap */
+}
+
+.popup-content .button {
+  /* Overrides for popup buttons */
+  padding: 12px 25px; /* Larger padding */
+  font-size: 1.05em; /* Slightly larger font */
+  min-width: 120px; /* Ensure button has minimum width */
+}
+
+/* Specific styles for error popups */
+.popup-content.error-popup {
+  background-color: #ffe0e0; /* Lighter red for error */
+  border: 1px solid #d9534f; /* Error red border */
+}
+
+.popup-content.error-popup p {
+  color: #d9534f; /* Error red text */
+}
+
+.popup-content.error-popup .button {
+  background-color: #d9534f; /* Error red button */
+}
+
+.popup-content.error-popup .button:hover {
+  background-color: #c9302c; /* Darker error red on hover */
+}
+
+/* Specific styles for success popups */
+.popup-content.success-popup {
+  background-color: #e0ffe0; /* Lighter green for success */
+  border: 1px solid #28a745; /* Success green border */
+}
+
+.popup-content.success-popup p {
+  color: #28a745; /* Success green text */
+}
+
+.popup-content.success-popup .button {
+  background-color: #28a745; /* Success green button */
+}
+
+.popup-content.success-popup .button:hover {
+  background-color: #218838; /* Darker success green on hover */
+}
+
+/* Keyframe animation (can be removed if using transition directly on opacity/transform) */
+@keyframes fadeInScale {
+  from {
+      opacity: 0;
+      transform: scale(0.9);
+  }
+  to {
+      opacity: 1;
+      transform: scale(1);
+  }
+}
