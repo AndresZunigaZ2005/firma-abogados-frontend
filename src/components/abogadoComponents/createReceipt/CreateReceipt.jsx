@@ -93,6 +93,8 @@ const CreateReceipt = ({ idCaso }) => {
             setFormData({ concepto: '', descripcion: '', valor: '' }); // Clear form
             setErrores({}); // Clear errors
             // Navigation will happen when success popup is closed
+            alert('Factura creada exitosamente.');
+            navigate(-1);
         } catch (error) {
             console.error('Error al crear la factura:', error);
             setPopupMessage(error.response?.data?.message || 'Error al crear la factura. Intente de nuevo.');

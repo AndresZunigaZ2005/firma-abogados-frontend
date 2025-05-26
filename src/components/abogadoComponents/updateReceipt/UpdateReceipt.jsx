@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'; // Import useCallback
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './UpdateReceipt.css'; // Ensure your CSS file is correctly linked and has the popup styles
+import './UpdateReceipt.css';
 
 const UpdateReceipt = ({ factura }) => {
     const [concepto, setConcepto] = useState(factura?.concepto || '');
@@ -9,44 +9,44 @@ const UpdateReceipt = ({ factura }) => {
     const [valor, setValor] = useState(factura?.valor || 0);
     const [abonos, setAbonos] = useState([]);
     const [currentFactura, setCurrentFactura] = useState(factura);
-    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-    const [showErrorPopup, setShowErrorPopup] = useState(false);
-    const [popupMessage, setPopupMessage] = useState('');
 
     const navigate = useNavigate();
 
-    // useCallback for fetching abonos to prevent unnecessary re-creations
-    const fetchAbonos = useCallback(async (facturaId) => {
-        setPopupMessage('');
-        setShowErrorPopup(false);
+    const fetchAbonos = useCallback(async (idFactura) => {
         try {
             const jwt = localStorage.getItem('jwt');
-            if (!jwt) throw new Error('No hay token de autenticación.');
+            if (!jwt) {
+                console.error('Error: No authentication token found.');
+                throw new Error('No hay token de autenticación.');
+            }
 
-            const response = await axios.get(
-                `${process.env.REACT_APP_LISTAR_ABONOS}${facturaId}`,
-                {
-                    headers: { Authorization: `Bearer ${jwt}` },
+            const response = await fetch(`${process.env.REACT_APP_LISTAR_ABONOS}/${idFactura}`, {
+                headers: { 'Authorization': `Bearer ${jwt}` }
+            });
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    console.log(`No abonos found for factura ID: ${idFactura} (404 Not Found)`);
+                    return [];
                 }
-            );
-            // Log the response data to understand its structure
-            console.log('Abonos API Response:', response.data);
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Error fetching abonos:', errorData.message || 'Unknown error');
+                throw new Error(errorData.message || 'Error al listar los abonos.');
+            }
 
-            // Adjust this line based on your actual API response structure
-            // Assuming 'respuesta' holds the array of abonos, or it's directly in data
-            const listaAbonos = response.data.respuesta || response.data || [];
-            setAbonos(listaAbonos);
+            const data = await response.json();
+            console.log('Abonos fetched successfully:', data);
+            return data.respuesta || [];
         } catch (err) {
-            console.error('Error al obtener los abonos:', err);
-            setPopupMessage(err.message || 'Error al obtener los abonos.');
-            setShowErrorPopup(true);
+            console.error('Unhandled error during abono fetch:', err);
+            throw err;
         }
-    }, []); // Empty dependency array as this function itself doesn't depend on component state/props
+    }, []); // Empty dependency array as fetchAbonos itself doesn't depend on any props/state from UpdateReceipt
 
     useEffect(() => {
         if (!factura || !factura.idFactura) {
-            setPopupMessage('No se ha proporcionado una factura válida para actualizar.');
-            setShowErrorPopup(true);
+            alert('No se ha proporcionado una factura válida para actualizar.');
+            console.error('No valid factura provided for update.');
             return;
         }
 
@@ -55,40 +55,45 @@ const UpdateReceipt = ({ factura }) => {
         setDescripcion(factura.descripcion || '');
         setValor(factura.valor || 0);
 
-        // Call fetchAbonos only if factura.idFactura exists
-        fetchAbonos(factura.idFactura);
-    }, [factura, fetchAbonos]); // Add fetchAbonos to dependency array
+        fetchAbonos(factura.idFactura)
+            .then(data => setAbonos(data))
+            .catch(err => {
+                console.error('Error setting abonos:', err);
+                alert(`Error al cargar los abonos: ${err.message}`);
+                setAbonos([]); // Ensure abonos is reset even on error
+            });
+    }, [factura, fetchAbonos]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setPopupMessage('');
-        setShowErrorPopup(false);
-        setShowSuccessPopup(false);
 
         // Basic validation for required fields and positive value
         if (!concepto.trim() || !descripcion.trim() || valor <= 0) {
-            setPopupMessage('Por favor, complete todos los campos y asegúrese que el valor sea mayor a cero.');
-            setShowErrorPopup(true);
+            alert('Por favor, complete todos los campos y asegúrese que el valor sea mayor a cero.');
+            console.log('Validation failed: Missing or invalid fields.');
             return;
         }
 
         // New validation: valor must be greater than or equal to saldoPendiente
         // Ensure currentFactura.saldoPendiente is a number for comparison
         if (valor < (currentFactura.saldoPendiente || 0)) {
-            setPopupMessage('El valor de la factura no puede ser menor al saldo pendiente.');
-            setShowErrorPopup(true);
+            alert('El valor de la factura no puede ser menor al saldo pendiente.');
+            console.log(`Validation failed: Value (${valor}) is less than pending balance (${currentFactura.saldoPendiente}).`);
             return;
         }
 
         try {
             const jwt = localStorage.getItem('jwt');
-            if (!jwt) throw new Error('No hay token de autenticación.');
+            if (!jwt) {
+                console.error('Error: No authentication token found for update.');
+                throw new Error('No hay token de autenticación.');
+            }
 
             const payload = {
                 idFactura: currentFactura.idFactura,
                 concepto,
                 descripcion,
-                estado: currentFactura.estadoFactura, // Keep existing state
+                estado: currentFactura.estadoFactura,
                 valor,
             };
 
@@ -96,42 +101,22 @@ const UpdateReceipt = ({ factura }) => {
                 headers: { Authorization: `Bearer ${jwt}` },
             });
 
-            console.log('Update Factura Response:', response.data);
-
-            setPopupMessage('La factura se ha actualizado correctamente.');
-            setShowSuccessPopup(true);
+            console.log('Update Factura successful:', response.data);
+            alert('La factura se ha actualizado correctamente.');
+            navigate(-1);
 
         } catch (err) {
-            console.error('Error al actualizar la factura:', err);
-            setPopupMessage(err.response?.data?.message || err.message || 'Error al actualizar la factura');
-            setShowErrorPopup(true);
+            const errorMessage = err.response?.data?.message || err.message || 'Error desconocido al actualizar la factura';
+            console.error('Error updating factura:', err.response?.data || err);
+            alert(`Error al actualizar la factura: ${errorMessage}`);
         }
-    };
-
-    const handleCloseSuccessPopup = () => {
-        setShowSuccessPopup(false);
-        navigate(-1); // Navigate back to the previous page
-    };
-
-    const handleCloseErrorPopup = () => {
-        setShowErrorPopup(false);
-        setPopupMessage('');
     };
 
     // Conditional rendering for initial loading/error state
     if (!currentFactura || !currentFactura.idFactura) {
         return (
             <div className="container">
-                {showErrorPopup ? (
-                    <div className="popup-overlay">
-                        <div className="popup-content error-popup">
-                            <p>{popupMessage}</p>
-                            <button onClick={handleCloseErrorPopup} className="button">Cerrar</button>
-                        </div>
-                    </div>
-                ) : (
-                    <p>Cargando detalles de la factura...</p>
-                )}
+                <p>Cargando detalles de la factura...</p>
             </div>
         );
     }
@@ -139,26 +124,6 @@ const UpdateReceipt = ({ factura }) => {
     return (
         <div className="container">
             <h2>Detalle de Factura</h2>
-
-            {/* Error Popup */}
-            {showErrorPopup && (
-                <div className="popup-overlay">
-                    <div className="popup-content error-popup">
-                        <p>{popupMessage}</p>
-                        <button onClick={handleCloseErrorPopup} className="button">Cerrar</button>
-                    </div>
-                </div>
-            )}
-
-            {/* Success Popup */}
-            {showSuccessPopup && (
-                <div className="popup-overlay">
-                    <div className="popup-content success-popup">
-                        <p>{popupMessage}</p>
-                        <button onClick={handleCloseSuccessPopup} className="button">Cerrar</button>
-                    </div>
-                </div>
-            )}
 
             <form onSubmit={handleSubmit}>
                 <div className="form-group">

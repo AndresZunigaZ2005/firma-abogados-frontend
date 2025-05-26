@@ -83,9 +83,11 @@ const TopBar = ({ isAuthenticated, onLogout }) => {
             <button onClick={() => handleNavigation('/addLawyer')}>
               Añadir abogado
             </button>
+            {/*
             <button onClick={() => handleNavigation('/generateStatistics')}>
               Ver estadísticas
             </button>
+            */}
             <button onClick={() => handleNavigation('/generateReceipt')}>
               Generar factura
             </button>
